@@ -68,11 +68,6 @@ func loadFromConfigFile(v *viper.Viper, cfg *Config) (*Config, error) {
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
-	// 打印关键配置值
-	fmt.Printf("加载配置文件成功 %s\n", cfg.ConfigFile)
-	fmt.Printf("HTTP服务器端口: %d\n", v.GetInt("port"))
-	fmt.Printf("Mode: %s\n", v.GetString("mode"))
-
 	return &Config{
 		ConfigFile: cfg.ConfigFile,
 		Port:       v.GetInt("port"),
