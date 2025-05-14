@@ -7,8 +7,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var cfg *Config
-
 // NewAPIServerCommand 创建服务启动命令实例
 
 func NewAPIServerCommand() *cobra.Command {
