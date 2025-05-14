@@ -1,0 +1,78 @@
+server:
+  http:
+    mode: debug # debug, release, test
+    port: 8080
+    readTimeout: 60
+    writeTimeout: 60
+    maxHeaderBytes: 1048576
+  grpc:
+    port: 9090
+    maxConnectionAge: 3600
+    maxConnectionAgeGrace: 10
+    maxConnectionIdle: 300
+    keepAliveTime: 60
+    keepAliveTimeout: 20
+    maxRecvMsgSize: 4194304 # 4MB
+    maxSendMsgSize: 4194304 # 4MB
+
+jwt:
+  secret: your-secret-key
+  expire: 7200 # 2小时
+  issuer: easyblog
+
+log:
+  level: info
+  dir: logs
+  format: json
+  outputPaths:
+    - stdout
+    - /var/log/easyblog/easyblog.log
+  errorOutputPaths:
+    - stderr
+    - /var/log/easyblog/easyblog.error.log
+  maxSize: 100 # MB
+  maxBackups: 7
+  maxAge: 30 # days
+  compress: true
+
+db:
+  host: 127.0.0.1
+  port: 3306
+  username: miniblog
+  password: miniblog1234
+  database: miniblog
+  logLevel: info
+  maxIdleConns: 10
+  maxOpenConns: 100
+  connMaxLifetime: 3600
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  db: 0
+  poolSize: 100
+  minIdleConns: 10
+  maxIdleConns: 20
+
+rateLimit:
+  enabled: true
+  rate: 100
+  burst: 200
+
+cors:
+  allowedOrigins:
+    - "*"
+  allowedMethods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowedHeaders:
+    - Origin
+    - Content-Type
+    - Accept
+    - Authorization
+  allowCredentials: true
+  maxAge: 86400
