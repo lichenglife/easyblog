@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/lichenglife/easyblog/internal/app"
 	"github.com/lichenglife/easyblog/internal/pkg/core"
+	"github.com/lichenglife/easyblog/internal/pkg/middleware"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -62,21 +63,21 @@ func (s *HTTPServer) Init() error {
 
 func (s *HTTPServer) initEngine() error {
 
+	// 设置运行模式
 	gin.SetMode(s.config.GetString("server.http.mode"))
 
 	engine := gin.New()
 
 	// 注册中间件
-
 	engine.Use(
-	// TODO 注册中间件
-	// RequestID
-
-	// 日志logger
-
-	// 故障恢复 Recovery
-
-	// 跨域
+		// RequestID
+		middleware.RequestID(),
+		// 请求日志记录
+		middleware.Logger(s.app.GetLogger()),
+		// 故障恢复
+		middleware.Recovery(s.app.GetLogger()),
+		// 跨域
+		middleware.CORS(),
 	)
 	s.engine = engine
 
