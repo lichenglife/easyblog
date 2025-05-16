@@ -106,8 +106,8 @@ func (l *Logger) Fatal(msg string, fields ...zap.Field) {
 }
 
 // Sync 同步日志
-func (l *Logger) Sync() {
-	l.Logger.Sync()
+func (l *Logger) Sync() error {
+	return l.Logger.Sync()
 }
 
 // With 创建带有字段的日志对象

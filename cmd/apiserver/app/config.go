@@ -89,14 +89,6 @@ func loadFromCommandLineOptions(v *viper.Viper, opts *options.Options) (*Config,
 		return nil, fmt.Errorf("failed to read config file: %v", err)
 	}
 
-	// 打印关键配置值
-	fmt.Printf("加载配置文件成功 %s\n", opts.ServerOpts.ConfigFile)
-	fmt.Printf("HTTP服务器端口: %d\n", v.GetInt("port"))
-	fmt.Printf("Mode: %s\n", v.GetString("mode"))
-	fmt.Printf("LogLevel: %s\n", v.GetString("log.level"))
-	fmt.Printf("数据库配置Database: %s\n", v.GetString("database.url"))
-	fmt.Printf("缓存Redis: %s\n", v.GetString("redis.url"))
-
 	// 将命令行参数与配置文件参数合并
 	mergeCommandLineOptions(v, opts)
 	return &Config{

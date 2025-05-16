@@ -88,7 +88,10 @@ func RunAppWithDefaultAppOptions(config *viper.Viper, appConfig *AppConfig) erro
 	defer cancel()
 
 	// 先关闭依赖的服务，再关闭被依赖的服务
-	server.Stop(ctx)
+	if err := server.Stop(ctx); err != nil {
+		app.GetLogger().Error("停止服务失败", zap.Error(err))
+		return err
+	}
 
 	return nil
 
