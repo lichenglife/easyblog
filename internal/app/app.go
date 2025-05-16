@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/lichenglife/easyblog/internal/apiserver/store"
 	"github.com/lichenglife/easyblog/internal/pkg/cache"
 	"github.com/lichenglife/easyblog/internal/pkg/db"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
@@ -32,6 +33,8 @@ type IApp interface {
 	GetLogger() *log.Logger
 	GetDB() *db.DB
 	GetCache() *cache.Cache
+	// GetStoreFactory 获取存储工厂实例
+	GetStoreFactory() store.Factory
 
 	// 服务接口
 
@@ -54,7 +57,7 @@ type App struct {
 	// 服务
 
 	//  存储
-
+	factory store.Factory
 	//  认证服务
 
 }
@@ -88,6 +91,11 @@ func NewAppWithOptions(config *viper.Viper, option *AppOptions) (IApp, error) {
 			return nil, fmt.Errorf("初始化缓存失败%v", err)
 		}
 	}
+	err = app.initStoreFactory()
+	if err != nil {
+		return nil, fmt.Errorf("初始化存储工厂失败%v", err)
+	}
+
 	return app, nil
 }
 
@@ -120,6 +128,11 @@ func (app *App) initCache() error {
 	app.cache = cache
 	return nil
 }
+
+func (app *App) initStoreFactory() error {
+	app.factory = store.NewFactory(app.Db.DB)
+	return nil
+}
 func (app *App) Close() error {
 
 	if app.Db != nil {
@@ -149,6 +162,11 @@ func (app *App) GetDB() *db.DB {
 func (app *App) GetCache() *cache.Cache {
 
 	return app.cache
+}
+
+func (app *App) GetStoreFactory() store.Factory {
+
+	return app.factory
 }
 
 // 服务接口

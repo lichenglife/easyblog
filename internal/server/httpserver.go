@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	handler "github.com/lichenglife/easyblog/internal/apiserver/handler/http"
 	"github.com/lichenglife/easyblog/internal/app"
 	"github.com/lichenglife/easyblog/internal/pkg/core"
 	"github.com/lichenglife/easyblog/internal/pkg/middleware"
@@ -26,6 +27,7 @@ type HTTPServer struct {
 	// http
 	http *http.Server
 	// handler 处理器
+	handler handler.Handler
 }
 
 func NewHttpServer(config *viper.Viper, app app.IApp) (*HTTPServer, error) {
@@ -35,7 +37,12 @@ func NewHttpServer(config *viper.Viper, app app.IApp) (*HTTPServer, error) {
 		app:    app,
 	}
 
-	// todo 创建业务处理器handler
+	factory := app.GetStoreFactory()
+
+	// TODO 创建业务处理器handler
+	handler := handler.NewHandler(app.GetLogger(), factory)
+
+	server.handler = handler
 
 	return server, nil
 }
