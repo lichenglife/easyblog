@@ -9,19 +9,19 @@ import (
 // PostHandler 定义PostHandler接口
 type PostHandler interface {
 	// createPost 实现创建帖子接口
-	createPost() gin.HandlerFunc
+	CreatePost() gin.HandlerFunc
 	// deletePost 实现删除帖子接口
-	deletePost() gin.HandlerFunc
+	DeletePost() gin.HandlerFunc
 	// getPostByID 实现根据ID获取帖子接口
-	getPostByID() gin.HandlerFunc
+	GetPostByID() gin.HandlerFunc
 	// getPostByPostID 实现根据帖子ID获取帖子接口
-	getPostByPostID() gin.HandlerFunc
+	GetPostByPostID() gin.HandlerFunc
 	// listPosts 实现获取帖子列表接口
-	listPosts() gin.HandlerFunc
+	ListPosts() gin.HandlerFunc
 	// updatePost 实现更新帖子接口
-	updatePost() gin.HandlerFunc
+	UpdatePost() gin.HandlerFunc
 	// getPostsByUserID 实现根据用户ID获取帖子列表接口
-	getPostsByUserID() gin.HandlerFunc
+	GetPostsByUserID() gin.HandlerFunc
 }
 
 // postHandler 实现PostHandler接口
@@ -31,37 +31,37 @@ type postHandler struct {
 }
 
 // createPost implements PostHandler.
-func (p *postHandler) createPost() gin.HandlerFunc {
+func (p *postHandler) CreatePost() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // deletePost implements PostHandler.
-func (p *postHandler) deletePost() gin.HandlerFunc {
+func (p *postHandler) DeletePost() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // getPostByID implements PostHandler.
-func (p *postHandler) getPostByID() gin.HandlerFunc {
+func (p *postHandler) GetPostByID() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // getPostByPostID implements PostHandler.
-func (p *postHandler) getPostByPostID() gin.HandlerFunc {
+func (p *postHandler) GetPostByPostID() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // getPostsByUserID implements PostHandler.
-func (p *postHandler) getPostsByUserID() gin.HandlerFunc {
+func (p *postHandler) GetPostsByUserID() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // listPosts implements PostHandler.
-func (p *postHandler) listPosts() gin.HandlerFunc {
+func (p *postHandler) ListPosts() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // updatePost implements PostHandler.
-func (p *postHandler) updatePost() gin.HandlerFunc {
+func (p *postHandler) UpdatePost() gin.HandlerFunc {
 	panic("unimplemented")
 }
 

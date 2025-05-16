@@ -21,12 +21,11 @@ type UserHandler interface {
 	UserLogin() gin.HandlerFunc
 	// UserLogout 用户登出
 	UserLogout() gin.HandlerFunc
-	// UserInfo 获取用户信息
-	UserInfo() gin.HandlerFunc
+
 	// ListUsers 获取用户列表
 	ListUsers() gin.HandlerFunc
-	// GetUserByID 根据 ID 获取用户
-	GetUserByID() gin.HandlerFunc
+	// GetUserByUsername 根据 用户名称 获取用户
+	GetUserByUsername() gin.HandlerFunc
 	// UpdateUser 更新用户
 	UpdateUser() gin.HandlerFunc
 	// DeleteUser 删除用户
@@ -60,7 +59,7 @@ func (u *userHandler) DeleteUser() gin.HandlerFunc {
 }
 
 // GetUserByID implements UserHandler.
-func (u *userHandler) GetUserByID() gin.HandlerFunc {
+func (u *userHandler) GetUserByUsername() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
@@ -81,11 +80,6 @@ func (u *userHandler) ResetPassword() gin.HandlerFunc {
 
 // UpdateUser implements UserHandler.
 func (u *userHandler) UpdateUser() gin.HandlerFunc {
-	panic("unimplemented")
-}
-
-// UserInfo implements UserHandler.
-func (u *userHandler) UserInfo() gin.HandlerFunc {
 	panic("unimplemented")
 }
 

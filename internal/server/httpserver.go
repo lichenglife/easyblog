@@ -94,20 +94,59 @@ func (s *HTTPServer) initEngine() error {
 func (s *HTTPServer) registerRoutes() error {
 
 	// 健康检查
-	s.engine.GET("/healthz", s.healthcheck)
+	s.engine.GET("/healthz", s.HealthCheck)
+	s.engine.GET("/readyz", s.HealthCheck)
 
 	// swagger api接口文档
 
 	// 业务功能路由规则
-	// v1 := s.engine.Group("/v1")
-	// {
-	// 	//
-	// }
+	v1 := s.engine.Group("/v1")
+	{
+		//  用户模块
+		// 用户登录
+		v1.POST("/users/login", s.handler.Users().UserLogin())
+		// 用户注册
+		v1.POST("/users", s.handler.Users().CreateUser())
+		// 获取用户信息
+		v1.GET("/users/:username", s.handler.Users().GetUserByUsername())
+
+		// 获取用户列表
+		v1.GET("/users", s.handler.Users().ListUsers())
+		// 更新用户信息
+		v1.PUT("/users/:username", s.handler.Users().UpdateUser())
+		// 删除用户
+		v1.DELETE("/users/:username", s.handler.Users().DeleteUser())
+		// 更新密码
+		v1.PUT("/users/:username/password", s.handler.Users().ResetPassword())
+		// 用户登出
+		v1.POST("/users/logout", s.handler.Users().UserLogout())
+
+		// 博客模块
+		// 创建博客
+		v1.POST("/posts", s.handler.Posts().CreatePost())
+		// 根据ID 查询模块
+		v1.GET("/posts/:postID", s.handler.Posts().GetPostByPostID())
+		// 根据用户查询博客
+		v1.GET("/posts/user/:userID", s.handler.Posts().GetPostsByUserID())
+		// 更新博客
+		v1.PUT("/posts/:postID", s.handler.Posts().UpdatePost())
+		v1.DELETE("/posts/:postID", s.handler.Posts().DeletePost())
+		v1.GET("/posts", s.handler.Posts().ListPosts())
+		v1.GET("/posts/user/:userID", s.handler.Posts().GetPostsByUserID())
+
+	}
 
 	return nil
 }
 
-func (s *HTTPServer) healthcheck(c *gin.Context) {
+// HealthCheck 健康检查
+func (s *HTTPServer) HealthCheck(c *gin.Context) {
+
+	core.WriteResponse(c, nil, gin.H{"status": "OK"})
+}
+
+// ReadyCheck 就绪检查
+func (s *HTTPServer) ReadyCheck(c *gin.Context) {
 
 	core.WriteResponse(c, nil, gin.H{"status": "OK"})
 }
