@@ -63,6 +63,9 @@ func (s *HTTPServer) Init() error {
 	if err := s.initHttpServer(); err != nil {
 		return fmt.Errorf("初始化httpserver失败:%v", err)
 	}
+	// 初始化参数校验器
+	core.InitValidator()
+
 	return nil
 }
 
@@ -104,35 +107,41 @@ func (s *HTTPServer) registerRoutes() error {
 	{
 		//  用户模块
 		// 用户登录
-		v1.POST("/users/login", s.handler.Users().UserLogin())
+		v1.POST("/users/login", s.handler.Users().UserLogin)
 		// 用户注册
-		v1.POST("/users", s.handler.Users().CreateUser())
-		// 获取用户信息
-		v1.GET("/users/:username", s.handler.Users().GetUserByUsername())
+		v1.POST("/users", s.handler.Users().CreateUser)
+		auth := v1.Group("").Use(middleware.Auth(s.app.GetAuthStrary()))
+		{
+			// 获取用户信息
+			auth.GET("/users/:username", s.handler.Users().GetUserByUsername)
 
-		// 获取用户列表
-		v1.GET("/users", s.handler.Users().ListUsers())
-		// 更新用户信息
-		v1.PUT("/users/:username", s.handler.Users().UpdateUser())
-		// 删除用户
-		v1.DELETE("/users/:username", s.handler.Users().DeleteUser())
-		// 更新密码
-		v1.PUT("/users/:username/password", s.handler.Users().ResetPassword())
-		// 用户登出
-		v1.POST("/users/logout", s.handler.Users().UserLogout())
+			// 获取用户列表
+			auth.GET("/users", s.handler.Users().ListUsers)
+			// 更新用户信息
+			auth.PUT("/users/:username", s.handler.Users().UpdateUser)
+			// 删除用户
+			auth.DELETE("/users/:username", s.handler.Users().DeleteUser)
+			// 更新密码
+			auth.PUT("/users/:username/password", s.handler.Users().ResetPassword)
+			// 用户登出
+			auth.POST("/users/logout", s.handler.Users().UserLogout)
+			// 查询用户
+			//auth.GET("/users/:userid",s.handler.Users().GetUserInfo)
 
-		// 博客模块
-		// 创建博客
-		v1.POST("/posts", s.handler.Posts().CreatePost())
-		// 根据ID 查询模块
-		v1.GET("/posts/:postID", s.handler.Posts().GetPostByPostID())
-		// 根据用户查询博客
-		v1.GET("/posts/user/:userID", s.handler.Posts().GetPostsByUserID())
-		// 更新博客
-		v1.PUT("/posts/:postID", s.handler.Posts().UpdatePost())
-		v1.DELETE("/posts/:postID", s.handler.Posts().DeletePost())
-		v1.GET("/posts", s.handler.Posts().ListPosts())
-		v1.GET("/posts/user/:userID", s.handler.Posts().GetPostsByUserID())
+			// 博客模块
+			// 创建博客
+			auth.POST("/posts", s.handler.Posts().CreatePost)
+			// 根据ID 查询模块
+			auth.GET("/posts/:postID", s.handler.Posts().GetPostByPostID)
+			// 根据用户查询博客
+			auth.GET("/posts/user/:userID", s.handler.Posts().GetPostsByUserID)
+			// 更新博客
+			auth.PUT("/posts/:postID", s.handler.Posts().UpdatePost)
+			// 删除博客
+			auth.DELETE("/posts/:postID", s.handler.Posts().DeletePost)
+			// 查询博客
+			auth.GET("/posts", s.handler.Posts().ListPosts)
+		}
 
 	}
 

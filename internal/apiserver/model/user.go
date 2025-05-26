@@ -4,15 +4,15 @@ import "time"
 
 // User 用户模型
 type User struct {
-	ID       uint      `gorm:"primaryKey" json:"id"`
-	UserID   string    `gorm:"column:userID;type:varchar(36);not null;uniqueIndex:user.userID;comment:用户唯一 ID" json:"userID"`
-	Username string    `gorm:"column:username;type:varchar(36);not null;uniqueIndex:user.username;comment:用户名" json:"username"`
-	Password string    `gorm:"column:password;type:varchar(36);not null;comment:密码" json:"-"`
-	NickName string    `gorm:"column:nickName;type:varchar(36);not null;comment:昵称" json:"nickName"`
-	Email    string    `gorm:"column:email;type:varchar(36);not null;comment:邮箱" json:"email"`
-	Phone    string    `gorm:"column:phone;type:varchar(36);not null;uniqueIndex:user.phone;comment:手机" json:"phone"`
-	CreateAt time.Time `gorm:"column:createAt;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:创建时间" json:"createAt"`
-	UpdateAt time.Time `gorm:"column:updateAt;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:更新时间" json:"updateAt"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	UserID    string    `gorm:"column:userID;type:varchar(36);not null;uniqueIndex:user.userID;comment:用户唯一 ID" json:"userID"`
+	Username  string    `gorm:"column:username;type:varchar(36);not null;uniqueIndex:user.username;comment:用户名" json:"username"`
+	Password  string    `gorm:"column:password;type:varchar(36);not null;comment:密码" json:"-"` // 密码不返回给前端
+	NickName  string    `gorm:"column:nickname;type:varchar(36);not null;comment:昵称" json:"nickName"`
+	Email     string    `gorm:"column:email;type:varchar(36);not null;comment:邮箱" json:"email"`
+	Phone     string    `gorm:"column:phone;type:varchar(36);not null;uniqueIndex:user.phone;comment:手机" json:"phone"`
+	CreatedAt time.Time `gorm:"column:createdAt;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:创建时间" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"column:updatedAt;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:更新时间" json:"updatedAt"`
 }
 
 // TableName 表名
@@ -36,11 +36,14 @@ type UpdateUser struct {
 
 // 用户响应结构体
 type UserInfo struct {
-	UserID   string `json:"userID"`
-	Username string `json:"username"`
-	Nickname string `json:"nickname"`
-	Email    string `json:"email"`
-	Phone    string `json:"phone"`
+	UserID    string    `json:"userID"`
+	Username  string    `json:"username"`
+	Nickname  string    `json:"nickname"`
+	Email     string    `json:"email"`
+	Phone     string    `json:"phone"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	CreatedAt time.Time `json:"createdAt"`
+	PostCount int       `json:"postCount"`
 }
 
 //  用户登录请求结构
@@ -64,5 +67,5 @@ type ChangePasswordRequest struct {
 type ListUserResponse struct {
 	TotalCount int64      `json:"totalCount"`
 	HasMore    bool       `json:"hasMore"`
-	User       []UserInfo `json:"users"`
+	Users      []UserInfo `json:"users"`
 }

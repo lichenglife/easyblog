@@ -35,7 +35,7 @@ func (o *Options) AddFlags(fs *pflag.FlagSet) {
 	o.CacheOpts.AddFlags(fs)
 }
 
-// Complete 完成选项\
+// Complete 完成选项
 func (o *Options) Complete() error {
 	if err := o.ServerOpts.Complete(); err != nil {
 		return err

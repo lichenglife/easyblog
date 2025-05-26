@@ -11,28 +11,32 @@ import (
 // UserBiz 用户业务接口
 type UserBiz interface {
 	// Create 创建用户
-	CreteUser(ctx context.Context, req *model.CreatePostRequest) (*model.UserInfo, error)
+	CreteUser(ctx context.Context, req *model.User) (*model.User, error)
 	// GetByID 根据 ID 获取用户
-	GetUserByID(ctx context.Context, id uint) (*model.UserInfo, error)
+	GetUserByID(ctx context.Context, userID string) (*model.UserInfo, error)
 	// GetByUsername 根据用户名获取用户
 	GetUserByUsername(ctx context.Context, username string) (*model.UserInfo, error)
 	// Update 更新用户
-	UpdateUser(ctx context.Context, user *model.UpdateUser) error
+	UpdateUser(ctx context.Context, username string, user *model.UpdateUser) error
 	// Delete 删除用户
-	DeleteUser(ctx context.Context, id uint) error
+	DeleteUser(ctx context.Context, username string) error
 	// List 获取用户列表
 	ListUsers(ctx context.Context, page, pageSize int) (*model.ListUserResponse, error)
+
+	ResetUserPassword(ctx context.Context, username, oldPassword, newPassword string) error
+
+	Login(ctx context.Context, username, password string) (*model.UserInfo, error)
 }
 
 type PostBiz interface {
 	// Create 创建帖子
 	CreatePost(ctx context.Context, req *model.CreatePostRequest) (*model.Post, error)
 	// GetByID 根据 ID 获取帖子
-	GetPostByID(ctx context.Context, id uint) (*model.Post, error)
+	//GetPostByID(ctx context.Context, id uint) (*model.Post, error)
 	// Update 更新帖子
 	UpdatePost(ctx context.Context, post *model.UpdatePostRequest) error
 	// Delete 删除帖子
-	DeletePost(ctx context.Context, id uint) error
+	DeletePostByPostID(ctx context.Context,  postID string) error
 	// List 获取帖子列表
 	ListPosts(ctx context.Context, page, pageSize int) (*model.ListPostResponse, error)
 	// GetByUserID 根据用户 ID 获取帖子列表
