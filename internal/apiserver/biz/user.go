@@ -18,14 +18,14 @@ var _ UserBiz = (*userBiz)(nil)
 // userBiz 定义了用户业务逻辑层
 type userBiz struct {
 	logger *log.Logger
-	store  store.UserStore
+	store  store.IStore
 }
 
 // Login implements UserBiz.
 func (u *userBiz) Login(ctx context.Context, username string, password string) (*model.UserInfo, error) {
 
 	// 校验用户密码
-	user, err := u.store.GetByUsername(ctx, username)
+	user, err := u.store.User().GetByUsername(ctx, username)
 	if err != nil {
 		u.logger.Logger.Error("用户登录失败", zap.Error(err))
 		return nil, errno.ErrUserNotFound
@@ -51,7 +51,7 @@ func (u *userBiz) Login(ctx context.Context, username string, password string) (
 func (u *userBiz) CreteUser(ctx context.Context, user *model.User) (*model.User, error) {
 
 	// 根据用户名称查询用户是否存在
-	_, err := u.store.GetByUsername(ctx, user.Username)
+	_, err := u.store.User().GetByUsername(ctx, user.Username)
 	if err == nil {
 		u.logger.Info("user already exist", zap.String("username", user.Username))
 		return nil, errno.ErrUserAlreadyExist
@@ -69,7 +69,7 @@ func (u *userBiz) CreteUser(ctx context.Context, user *model.User) (*model.User,
 	// 生成用户ID
 	user.UserID = utils.GenUserID()
 
-	if err := u.store.Create(ctx, user); err != nil {
+	if err := u.store.User().Create(ctx, user); err != nil {
 		u.logger.Error("Create user failed: %v", zap.Error(err))
 		return nil, err
 	}
@@ -79,7 +79,7 @@ func (u *userBiz) CreteUser(ctx context.Context, user *model.User) (*model.User,
 
 // DeleteUser implements UserBiz.
 func (u *userBiz) DeleteUser(ctx context.Context, username string) error {
-	err := u.store.Delete(ctx, username)
+	err := u.store.User().Delete(ctx, username)
 	if err != nil {
 		u.logger.Logger.Error("删除用户失败", zap.Error(err))
 		return err
@@ -89,7 +89,7 @@ func (u *userBiz) DeleteUser(ctx context.Context, username string) error {
 
 // GetUserByID implements UserBiz.
 func (u *userBiz) GetUserByID(ctx context.Context, userID string) (*model.UserInfo, error) {
-	user, err := u.store.GetByID(ctx, userID)
+	user, err := u.store.User().GetByID(ctx, userID)
 	if err != nil {
 		u.logger.Logger.Error("用户不存在", zap.String("userID", userID), zap.Error(err))
 		return nil, err
@@ -107,7 +107,7 @@ func (u *userBiz) GetUserByID(ctx context.Context, userID string) (*model.UserIn
 // GetUserByUsername implements UserBiz.
 func (u *userBiz) GetUserByUsername(ctx context.Context, username string) (*model.UserInfo, error) {
 
-	user, err := u.store.GetByUsername(ctx, username)
+	user, err := u.store.User().GetByUsername(ctx, username)
 	if err != nil {
 		u.logger.Error("GetUserByUsername failed: %v", zap.Error(err))
 		return nil, err
@@ -124,7 +124,7 @@ func (u *userBiz) GetUserByUsername(ctx context.Context, username string) (*mode
 // ListUsers implements UserBiz.
 func (u *userBiz) ListUsers(ctx context.Context, page int, pageSize int) (*model.ListUserResponse, error) {
 	// 请求store获取用户列表
-	userlist, count, err := u.store.List(ctx, page, pageSize)
+	userlist, count, err := u.store.User().List(ctx, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (u *userBiz) ListUsers(ctx context.Context, page int, pageSize int) (*model
 // UpdateUser implements UserBiz.
 func (u *userBiz) UpdateUser(ctx context.Context, username string, req *model.UpdateUser) error {
 
-	user, err := u.store.GetByUsername(ctx, username)
+	user, err := u.store.User().GetByUsername(ctx, username)
 	if err != nil {
 		u.logger.Error("用户不存在", zap.String("用户名", username), zap.Error(err))
 		return errno.ErrNotFound
@@ -168,7 +168,7 @@ func (u *userBiz) UpdateUser(ctx context.Context, username string, req *model.Up
 	}
 	user.UpdatedAt = time.Now()
 
-	err = u.store.Update(ctx, user)
+	err = u.store.User().Update(ctx, user)
 	if err != nil {
 		u.logger.Logger.Error("更新用户失败", zap.String("username", username), zap.Error(err))
 		return err
@@ -179,7 +179,7 @@ func (u *userBiz) UpdateUser(ctx context.Context, username string, req *model.Up
 // ResetUserPassword 修改用户密码
 func (u *userBiz) ResetUserPassword(ctx context.Context, username, oldPassword, newPassword string) error {
 	// 1. 根据用户名获取用户
-	user, err := u.store.GetByUsername(ctx, username)
+	user, err := u.store.User().GetByUsername(ctx, username)
 	if err != nil && errno.IsRecordNotFound(err) {
 		u.logger.Info("用户不存在", zap.String("username", username))
 		return err
@@ -193,7 +193,7 @@ func (u *userBiz) ResetUserPassword(ctx context.Context, username, oldPassword, 
 		Username: username,
 		Password: newPassword,
 	}
-	if err := u.store.Update(ctx, updateUser); err != nil {
+	if err := u.store.User().Update(ctx, updateUser); err != nil {
 		u.logger.Error("更新密码失败", zap.Error(err))
 	}
 	return nil

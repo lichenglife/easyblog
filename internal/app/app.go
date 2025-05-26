@@ -36,7 +36,7 @@ type IApp interface {
 	GetDB() *db.DB
 	GetCache() *cache.Cache
 	// GetStoreFactory 获取存储工厂实例
-	GetStoreFactory() store.Factory
+	GetStoreFactory() store.IStore
 	// GetAuthStrary
 	GetAuthStrary() middleware.AuthStrategy
 	// 服务接口
@@ -60,7 +60,7 @@ type App struct {
 	// 服务
 
 	//  存储
-	factory store.Factory
+	factory store.IStore
 	//  认证服务
 	authStrategy middleware.AuthStrategy
 }
@@ -139,12 +139,12 @@ func (app *App) initCache() error {
 }
 
 func (app *App) initStoreFactory() error {
-	app.factory = store.NewFactory(app.Db.DB)
+	app.factory = store.NewIStore(app.Db.DB)
 	return nil
 }
 
 func (app *App) initAuthStrary() error {
-	userStore := app.GetStoreFactory().User()
+	userStore := app.GetStoreFactory()
 	userBiz := biz.NewUserBiz(app.logger, userStore)
 	app.authStrategy = middleware.NewJWTStrategy(userBiz)
 	return nil
@@ -180,7 +180,7 @@ func (app *App) GetCache() *cache.Cache {
 	return app.cache
 }
 
-func (app *App) GetStoreFactory() store.Factory {
+func (app *App) GetStoreFactory() store.IStore {
 
 	return app.factory
 }

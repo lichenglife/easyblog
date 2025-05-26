@@ -8,7 +8,7 @@ import (
 )
 
 // Factory 存储层工厂接口
-type Factory interface {
+type IStore interface {
 	// Post() PostStore
 	User() UserStore
 
@@ -55,7 +55,7 @@ type dataStore struct {
 }
 
 // NewFactory 创建存储层工厂
-func NewFactory(db *gorm.DB) Factory {
+func NewIStore(db *gorm.DB) IStore {
 	return &dataStore{db: db}
 }
 

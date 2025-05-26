@@ -46,7 +46,7 @@ type PostBiz interface {
 }
 
 // NewPostBiz 实例化postBiz对象
-func NewPostBiz(logger *log.Logger, store store.PostStore) PostBiz {
+func NewPostBiz(logger *log.Logger, store store.IStore) PostBiz {
 
 	return &postBiz{
 		logger: logger,
@@ -54,7 +54,7 @@ func NewPostBiz(logger *log.Logger, store store.PostStore) PostBiz {
 	}
 }
 
-func NewUserBiz(logger *log.Logger, store store.UserStore) UserBiz {
+func NewUserBiz(logger *log.Logger, store store.IStore) UserBiz {
 	return &userBiz{
 		logger: logger,
 		store:  store,

@@ -20,17 +20,17 @@ type Handler interface {
 // handler 定义了Handler接口的实现
 type handler struct {
 	logger       *log.Logger
-	store        store.Factory
+	store        store.IStore
 	UserHandler  UserHandler
 	PostHandler  PostHandler
 	authStrategy middleware.AuthStrategy
 }
 
 // NewHandler 创建Handler实例
-func NewHandler(logger *log.Logger, store store.Factory) Handler {
+func NewHandler(logger *log.Logger, store store.IStore) Handler {
 
-	userbiz := biz.NewUserBiz(logger, store.User())
-	postbiz := biz.NewPostBiz(logger, store.Post())
+	userbiz := biz.NewUserBiz(logger, store)
+	postbiz := biz.NewPostBiz(logger,store)
 
 	// 创建authStratrgy
 	authStrategy := middleware.NewJWTStrategy(userbiz)
