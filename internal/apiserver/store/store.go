@@ -44,7 +44,7 @@ type PostStore interface {
 	// List 获取帖子列表
 	List(ctx context.Context, page, pageSize int) ([]*model.Post, error)
 	// GetByUserID 根据用户 ID 获取帖子列表
-	GetByUserID(ctx context.Context, userID string, page, pageSize int) ([]*model.Post, error)
+	GetByUserID(ctx context.Context, userID string, page, pageSize int) (int ,[]*model.Post, error)
 	// GetByPostID 根据帖子 ID 获取帖子
 	GetByPostID(ctx context.Context, postID string) (*model.Post, error)
 }

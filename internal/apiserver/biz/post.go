@@ -75,13 +75,14 @@ func (p *postBiz) GetPostByPostID(ctx context.Context, postID string) (*model.Po
 }
 
 // GetPostsByUserID implements PostBiz.
-func (p *postBiz) GetPostsByUserID(ctx context.Context, userID string, page int, pageSize int) (*model.ListPostResponse, error) {
-	posts, err := p.store.Post().GetByUserID(ctx, userID, page, pageSize)
+func (p *postBiz) GetPostsByUserID(ctx context.Context, userID string, page int, pageSize int) (int, *model.ListPostResponse, error) {
+	var count int
+	count, posts, err := p.store.Post().GetByUserID(ctx, userID, page, pageSize)
 	if err != nil {
 		p.logger.Error("get posts by user id failed, err: %v", zap.Error(err))
-		return nil, err
+		return 0, nil, err
 	}
-	return &model.ListPostResponse{
+	return count, &model.ListPostResponse{
 		Posts:      posts,
 		TotalCount: int64(len(posts)),
 		HasMore:    len(posts) == pageSize,

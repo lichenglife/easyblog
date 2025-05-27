@@ -105,7 +105,7 @@ func (p *postHandler) GetPostsByUserID(c *gin.Context) {
 
 	pagesize := core.GetLimitParam(c)
 	page := core.GetPageParam(c)
-	posts, err := p.postBiz.GetPostsByUserID(c, userID, page, pagesize)
+	_, posts, err := p.postBiz.GetPostsByUserID(c, userID, page, pagesize)
 	if err != nil {
 		p.logger.Logger.Error("failed get postByUserID", zap.Error(err))
 		core.WriteResponse(c, err, nil)

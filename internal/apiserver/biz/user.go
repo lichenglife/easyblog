@@ -11,6 +11,7 @@ import (
 	"github.com/lichenglife/easyblog/internal/pkg/utils"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/sync/errgroup"
 )
 
 var _ UserBiz = (*userBiz)(nil)
@@ -106,18 +107,25 @@ func (u *userBiz) GetUserByID(ctx context.Context, userID string) (*model.UserIn
 
 // GetUserByUsername implements UserBiz.
 func (u *userBiz) GetUserByUsername(ctx context.Context, username string) (*model.UserInfo, error) {
-
+	// 查询用户信息
 	user, err := u.store.User().GetByUsername(ctx, username)
 	if err != nil {
 		u.logger.Error("GetUserByUsername failed: %v", zap.Error(err))
 		return nil, err
 	}
+	// 根据userID 查询博客列表
+	var count int
+	count, _, err = u.store.Post().GetByUserID(ctx, user.UserID, 1, 10)
+	if err != nil {
+		return nil, err
+	}
 	return &model.UserInfo{
-		UserID:   user.UserID,
-		Username: user.Username,
-		Nickname: user.NickName,
-		Email:    user.Email,
-		Phone:    user.Phone,
+		UserID:    user.UserID,
+		Username:  user.Username,
+		Nickname:  user.NickName,
+		Email:     user.Email,
+		Phone:     user.Phone,
+		PostCount: count,
 	}, nil
 }
 
@@ -128,20 +136,50 @@ func (u *userBiz) ListUsers(ctx context.Context, page int, pageSize int) (*model
 	if err != nil {
 		return nil, err
 	}
-	//
+	//  查询博客数量
+	// 遍历userlist ，查询每个用户的博客数量，添加到UserInfo中
 	users := make([]model.UserInfo, 0, len(userlist))
+
+	//var m sync.Map
+	eg, ctx := errgroup.WithContext(ctx)
+	// 设置最大并发数
+	eg.SetLimit(10)
+	var postCount int
 	for _, user := range userlist {
 
-		users = append(users, model.UserInfo{
-			UserID:    user.UserID,
-			Username:  user.Username,
-			Nickname:  user.NickName,
-			Email:     user.Email,
-			Phone:     user.Phone,
-			UpdatedAt: user.UpdatedAt,
-			CreatedAt: user.CreatedAt,
+		eg.Go(func() error {
+
+			select {
+
+			case <-ctx.Done():
+				return nil
+			default:
+			}
+			//var postCount int
+			postCount, _, err = u.store.Post().GetByUserID(ctx, user.UserID, 1, 10)
+			if err != nil {
+				return err
+			}
+			u.logger.Logger.Info("postCount", zap.Int("postCount", postCount))
+			users = append(users, model.UserInfo{
+				UserID:    user.UserID,
+				Username:  user.Username,
+				Nickname:  user.NickName,
+				Email:     user.Email,
+				Phone:     user.Phone,
+				UpdatedAt: user.UpdatedAt,
+				CreatedAt: user.CreatedAt,
+				PostCount: int(postCount),
+			})
+			return nil
 		})
+
 	}
+	if err := eg.Wait(); err != nil {
+		u.logger.Logger.Error("failed to return all users", zap.Error(err))
+		return nil, err
+	}
+
 	return &model.ListUserResponse{
 		Users:      users,
 		TotalCount: count,

@@ -40,7 +40,7 @@ type PostBiz interface {
 	// List 获取帖子列表
 	ListPosts(ctx context.Context, page, pageSize int) (*model.ListPostResponse, error)
 	// GetByUserID 根据用户 ID 获取帖子列表
-	GetPostsByUserID(ctx context.Context, userID string, page, pageSize int) (*model.ListPostResponse, error)
+	GetPostsByUserID(ctx context.Context, userID string, page, pageSize int) (int,*model.ListPostResponse, error)
 	// GetByPostID 根据帖子 ID 获取帖子
 	GetPostByPostID(ctx context.Context, postID string) (*model.Post, error)
 }

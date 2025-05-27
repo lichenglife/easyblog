@@ -19,7 +19,7 @@ func NewPosts(db *gorm.DB) PostStore {
 
 // Create 创建帖子
 func (p *posts) Create(ctx context.Context, post *model.Post) error {
-	return nil
+	return p.db.Create(post).Error
 }
 
 // GetByID 根据 ID 获取帖子
@@ -56,13 +56,18 @@ func (p *posts) List(ctx context.Context, page, pageSize int) ([]*model.Post, er
 }
 
 // GetByUserID 根据用户 ID 获取帖子列表
-func (p *posts) GetByUserID(ctx context.Context, userID string, page, pageSize int) ([]*model.Post, error) {
+func (p *posts) GetByUserID(ctx context.Context, userID string, page, pageSize int) (int, []*model.Post, error) {
+
+	var count int64
+	if err := p.db.Model(&model.Post{}).Where("userID = ?", userID).Count(&count).Error; err != nil {
+		return 0, nil, err
+	}
 	posts := make([]*model.Post, 0)
 	err := p.db.Where("userID = ?", userID).Offset((page - 1) * pageSize).Limit(pageSize).Find(&posts).Error
 	if err != nil {
-		return nil, err
+		return 0, nil, err
 	}
-	return posts, nil
+	return int(count), posts, nil
 }
 
 // GetByPostID 根据帖子 ID 获取帖子
