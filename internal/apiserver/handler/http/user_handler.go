@@ -10,27 +10,27 @@ import (
 type UserHandler interface {
 
 	// CreteUser 创建用户
-	CreateUser() gin.HandlerFunc
+	CreateUser(c *gin.Context)
 	// ChangePassword 修改密码
 	// ResetPassword 重置密码
-	ResetPassword() gin.HandlerFunc
+	ResetPassword(c *gin.Context)
 	// UserInfo 获取用户信息
-	GetUserInfo() gin.HandlerFunc
+	GetUserInfo(c *gin.Context)
 
 	// UserLogin 用户登录
-	UserLogin() gin.HandlerFunc
+	UserLogin(c *gin.Context)
 	// UserLogout 用户登出
-	UserLogout() gin.HandlerFunc
+	UserLogout(c *gin.Context)
 	// UserInfo 获取用户信息
-	UserInfo() gin.HandlerFunc
+	UserInfo(c *gin.Context)
 	// ListUsers 获取用户列表
-	ListUsers() gin.HandlerFunc
+	ListUsers(c *gin.Context)
 	// GetUserByID 根据 ID 获取用户
-	GetUserByID() gin.HandlerFunc
+	GetUserByID(c *gin.Context)
 	// UpdateUser 更新用户
-	UpdateUser() gin.HandlerFunc
+	UpdateUser(c *gin.Context)
 	// DeleteUser 删除用户
-	DeleteUser() gin.HandlerFunc
+	DeleteUser(c *gin.Context)
 }
 
 // userHandler 实现了 UserHandler 接口
@@ -50,51 +50,51 @@ func NewUserHandler(logger *log.Logger, biz biz.UserBiz) UserHandler {
 var _ UserHandler = (*userHandler)(nil)
 
 // CreateUser implements UserHandler.
-func (u *userHandler) CreateUser() gin.HandlerFunc {
+func (u *userHandler) CreateUser(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // DeleteUser implements UserHandler.
-func (u *userHandler) DeleteUser() gin.HandlerFunc {
+func (u *userHandler) DeleteUser(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // GetUserByID implements UserHandler.
-func (u *userHandler) GetUserByID() gin.HandlerFunc {
+func (u *userHandler) GetUserByID(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // GetUserInfo implements UserHandler.
-func (u *userHandler) GetUserInfo() gin.HandlerFunc {
+func (u *userHandler) GetUserInfo(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // ListUsers implements UserHandler.
-func (u *userHandler) ListUsers() gin.HandlerFunc {
+func (u *userHandler) ListUsers(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // ResetPassword implements UserHandler.
-func (u *userHandler) ResetPassword() gin.HandlerFunc {
+func (u *userHandler) ResetPassword(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // UpdateUser implements UserHandler.
-func (u *userHandler) UpdateUser() gin.HandlerFunc {
+func (u *userHandler) UpdateUser(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // UserInfo implements UserHandler.
-func (u *userHandler) UserInfo() gin.HandlerFunc {
+func (u *userHandler) UserInfo(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // UserLogin implements UserHandler.
-func (u *userHandler) UserLogin() gin.HandlerFunc {
+func (u *userHandler) UserLogin(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // UserLogout implements UserHandler.
-func (u *userHandler) UserLogout() gin.HandlerFunc {
+func (u *userHandler) UserLogout(c *gin.Context) {
 	panic("unimplemented")
 }
