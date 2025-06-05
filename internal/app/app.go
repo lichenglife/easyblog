@@ -34,7 +34,7 @@ type IApp interface {
 	GetDB() *db.DB
 	GetCache() *cache.Cache
 	// GetStoreFactory 获取存储工厂实例
-	GetStoreFactory() store.Factory
+	GetStoreFactory() store.IStore
 
 	// 服务接口
 
@@ -57,7 +57,7 @@ type App struct {
 	// 服务
 
 	//  存储
-	factory store.Factory
+	store store.IStore
 	//  认证服务
 
 }
@@ -130,7 +130,7 @@ func (app *App) initCache() error {
 }
 
 func (app *App) initStoreFactory() error {
-	app.factory = store.NewFactory(app.Db.DB)
+	app.store = store.NewStore(app.Db.DB)
 	return nil
 }
 func (app *App) Close() error {
@@ -164,9 +164,9 @@ func (app *App) GetCache() *cache.Cache {
 	return app.cache
 }
 
-func (app *App) GetStoreFactory() store.Factory {
+func (app *App) GetStoreFactory() store.IStore {
 
-	return app.factory
+	return app.store
 }
 
 // 服务接口

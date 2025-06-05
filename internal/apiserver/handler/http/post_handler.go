@@ -25,7 +25,7 @@ type PostHandler interface {
 // postHandler 实现PostHandler接口
 type postHandler struct {
 	logger  *log.Logger
-	postBiz biz.PostBiz
+	postBiz biz.IBiz
 }
 
 // createPost implements PostHandler.
@@ -59,9 +59,8 @@ func (p *postHandler) UpdatePost(c *gin.Context) {
 }
 
 // NewPostHandler 创建PostHandler实例
-func NewPostHandler(logger *log.Logger, postBiz biz.PostBiz) PostHandler {
+func NewPostHandler(logger *log.Logger, postBiz biz.IBiz) PostHandler {
 	return &postHandler{
-		logger:  logger,
 		postBiz: postBiz,
 	}
 }

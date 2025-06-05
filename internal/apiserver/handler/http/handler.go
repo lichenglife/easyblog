@@ -19,23 +19,21 @@ type Handler interface {
 // handler 定义了Handler接口的实现
 type handler struct {
 	logger      *log.Logger
-	store       store.Factory
+	store       store.IStore
 	UserHandler UserHandler
 	PostHandler PostHandler
 }
 
 // NewHandler 创建Handler实例
-func NewHandler(logger *log.Logger, store store.Factory) Handler {
+func NewHandler(logger *log.Logger, store store.IStore) Handler {
 	h := &handler{
 		logger: logger,
 		store:  store,
 	}
+	biz := biz.NewBiz(store)
 
-	userbiz := biz.NewUserBiz(logger, store.User())
-	postbiz := biz.NewPostBiz(logger, store.Post())
-
-	h.UserHandler = NewUserHandler(logger, userbiz)
-	h.PostHandler = NewPostHandler(logger, postbiz)
+	h.UserHandler = NewUserHandler(logger, biz)
+	h.PostHandler = NewPostHandler(logger, biz)
 	return h
 }
 

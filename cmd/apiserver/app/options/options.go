@@ -90,7 +90,7 @@ type ServerOptions struct {
 // NewServerOptions 创建默认服务选项
 func NewServerOptions() *ServerOptions {
 	return &ServerOptions{
-		ConfigFile:     "../../configs/apiserver.yaml",
+		ConfigFile:     "configs/apiserver.yaml",
 		Port:           8080,
 		Mode:           "debug",
 		ReadTimeout:    60,

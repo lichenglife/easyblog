@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/lichenglife/easyblog/internal/apiserver/biz"
+	"github.com/lichenglife/easyblog/internal/apiserver/model"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
 )
 
@@ -36,11 +37,11 @@ type UserHandler interface {
 // userHandler 实现了 UserHandler 接口
 type userHandler struct {
 	logger  *log.Logger
-	userBiz biz.UserBiz
+	userBiz biz.IBiz
 }
 
 // NewUserHandler 创建 UserHandler 实例
-func NewUserHandler(logger *log.Logger, biz biz.UserBiz) UserHandler {
+func NewUserHandler(logger *log.Logger, biz biz.IBiz) UserHandler {
 	return &userHandler{
 		logger:  logger,
 		userBiz: biz,
@@ -51,7 +52,12 @@ var _ UserHandler = (*userHandler)(nil)
 
 // CreateUser implements UserHandler.
 func (u *userHandler) CreateUser(c *gin.Context) {
-	panic("unimplemented")
+	// 解析请求参数
+	var req model.CreateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
 }
 
 // DeleteUser implements UserHandler.
