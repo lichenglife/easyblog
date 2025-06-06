@@ -3,7 +3,6 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/lichenglife/easyblog/internal/apiserver/biz"
-	"github.com/lichenglife/easyblog/internal/apiserver/model"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
 )
 
@@ -11,37 +10,37 @@ import (
 type UserHandler interface {
 
 	// CreteUser 创建用户
-	CreateUser(c *gin.Context)
+	CreateUser() gin.HandlerFunc
 	// ChangePassword 修改密码
 	// ResetPassword 重置密码
-	ResetPassword(c *gin.Context)
+	ResetPassword() gin.HandlerFunc
 	// UserInfo 获取用户信息
-	GetUserInfo(c *gin.Context)
+	GetUserInfo() gin.HandlerFunc
 
 	// UserLogin 用户登录
-	UserLogin(c *gin.Context)
+	UserLogin() gin.HandlerFunc
 	// UserLogout 用户登出
-	UserLogout(c *gin.Context)
+	UserLogout() gin.HandlerFunc
 	// UserInfo 获取用户信息
-	UserInfo(c *gin.Context)
+	UserInfo() gin.HandlerFunc
 	// ListUsers 获取用户列表
-	ListUsers(c *gin.Context)
+	ListUsers() gin.HandlerFunc
 	// GetUserByID 根据 ID 获取用户
-	GetUserByID(c *gin.Context)
+	GetUserByID() gin.HandlerFunc
 	// UpdateUser 更新用户
-	UpdateUser(c *gin.Context)
+	UpdateUser() gin.HandlerFunc
 	// DeleteUser 删除用户
-	DeleteUser(c *gin.Context)
+	DeleteUser() gin.HandlerFunc
 }
 
 // userHandler 实现了 UserHandler 接口
 type userHandler struct {
 	logger  *log.Logger
-	userBiz biz.IBiz
+	userBiz biz.UserBiz
 }
 
 // NewUserHandler 创建 UserHandler 实例
-func NewUserHandler(logger *log.Logger, biz biz.IBiz) UserHandler {
+func NewUserHandler(logger *log.Logger, biz biz.UserBiz) UserHandler {
 	return &userHandler{
 		logger:  logger,
 		userBiz: biz,
@@ -51,56 +50,51 @@ func NewUserHandler(logger *log.Logger, biz biz.IBiz) UserHandler {
 var _ UserHandler = (*userHandler)(nil)
 
 // CreateUser implements UserHandler.
-func (u *userHandler) CreateUser(c *gin.Context) {
-	// 解析请求参数
-	var req model.CreateUserRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
-		return
-	}
+func (u *userHandler) CreateUser() gin.HandlerFunc {
+	panic("unimplemented")
 }
 
 // DeleteUser implements UserHandler.
-func (u *userHandler) DeleteUser(c *gin.Context) {
+func (u *userHandler) DeleteUser() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // GetUserByID implements UserHandler.
-func (u *userHandler) GetUserByID(c *gin.Context) {
+func (u *userHandler) GetUserByID() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // GetUserInfo implements UserHandler.
-func (u *userHandler) GetUserInfo(c *gin.Context) {
+func (u *userHandler) GetUserInfo() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // ListUsers implements UserHandler.
-func (u *userHandler) ListUsers(c *gin.Context) {
+func (u *userHandler) ListUsers() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // ResetPassword implements UserHandler.
-func (u *userHandler) ResetPassword(c *gin.Context) {
+func (u *userHandler) ResetPassword() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // UpdateUser implements UserHandler.
-func (u *userHandler) UpdateUser(c *gin.Context) {
+func (u *userHandler) UpdateUser() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // UserInfo implements UserHandler.
-func (u *userHandler) UserInfo(c *gin.Context) {
+func (u *userHandler) UserInfo() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // UserLogin implements UserHandler.
-func (u *userHandler) UserLogin(c *gin.Context) {
+func (u *userHandler) UserLogin() gin.HandlerFunc {
 	panic("unimplemented")
 }
 
 // UserLogout implements UserHandler.
-func (u *userHandler) UserLogout(c *gin.Context) {
+func (u *userHandler) UserLogout() gin.HandlerFunc {
 	panic("unimplemented")
 }

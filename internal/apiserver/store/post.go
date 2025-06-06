@@ -7,23 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type PostStore interface {
-	// Create 创建帖子
-	Create(ctx context.Context, post *model.Post) error
-	// GetByID 根据 ID 获取帖子
-	GetByID(ctx context.Context, id uint) (*model.Post, error)
-	// Update 更新帖子
-	Update(ctx context.Context, post *model.Post) error
-	// Delete 删除帖子
-	Delete(ctx context.Context, id uint) error
-	// List 获取帖子列表
-	List(ctx context.Context, page, pageSize int) ([]*model.Post, error)
-	// GetByUserID 根据用户 ID 获取帖子列表
-	GetByUserID(ctx context.Context, userID string, page, pageSize int) ([]*model.Post, error)
-	// GetByPostID 根据帖子 ID 获取帖子
-	GetByPostID(ctx context.Context, postID string) (*model.Post, error)
-}
-
 // postStore 实现Factory 的全部接口
 type posts struct {
 	db *gorm.DB

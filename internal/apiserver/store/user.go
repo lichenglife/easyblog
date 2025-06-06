@@ -7,21 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserStore interface {
-	// Create 创建用户
-	Create(ctx context.Context, user *model.User) error
-	// GetByID 根据 ID 获取用户
-	GetByID(ctx context.Context, id uint) (*model.User, error)
-	// GetByUsername 根据用户名获取用户
-	GetByUsername(ctx context.Context, username string) (*model.User, error)
-	// Update 更新用户
-	Update(ctx context.Context, user *model.User) error
-	// Delete 删除用户
-	Delete(ctx context.Context, id uint) error
-	// List 获取用户列表
-	List(ctx context.Context, page, pageSize int) ([]*model.User, error)
-}
-
 // users 实现 UserStore 接口
 type users struct {
 	db *gorm.DB

@@ -1,21 +1,14 @@
 package store
 
 import (
-	"sync"
+	"context"
 
+	"github.com/lichenglife/easyblog/internal/apiserver/model"
 	"gorm.io/gorm"
 )
 
-var (
-
-	// 确保store 是实例化一次
-	once sync.Once
-	// 全局变量
-	S *dataStore
-)
-
-// IStore 存储层工厂接口
-type IStore interface {
+// Factory 存储层工厂接口
+type Factory interface {
 	// Post() PostStore
 	User() UserStore
 
@@ -24,21 +17,46 @@ type IStore interface {
 	Close() error
 }
 
-// dataStore 实现 IStore 接口
+type UserStore interface {
+	// Create 创建用户
+	Create(ctx context.Context, user *model.User) error
+	// GetByID 根据 ID 获取用户
+	GetByID(ctx context.Context, id uint) (*model.User, error)
+	// GetByUsername 根据用户名获取用户
+	GetByUsername(ctx context.Context, username string) (*model.User, error)
+	// Update 更新用户
+	Update(ctx context.Context, user *model.User) error
+	// Delete 删除用户
+	Delete(ctx context.Context, id uint) error
+	// List 获取用户列表
+	List(ctx context.Context, page, pageSize int) ([]*model.User, error)
+}
+
+type PostStore interface {
+	// Create 创建帖子
+	Create(ctx context.Context, post *model.Post) error
+	// GetByID 根据 ID 获取帖子
+	GetByID(ctx context.Context, id uint) (*model.Post, error)
+	// Update 更新帖子
+	Update(ctx context.Context, post *model.Post) error
+	// Delete 删除帖子
+	Delete(ctx context.Context, id uint) error
+	// List 获取帖子列表
+	List(ctx context.Context, page, pageSize int) ([]*model.Post, error)
+	// GetByUserID 根据用户 ID 获取帖子列表
+	GetByUserID(ctx context.Context, userID string, page, pageSize int) ([]*model.Post, error)
+	// GetByPostID 根据帖子 ID 获取帖子
+	GetByPostID(ctx context.Context, postID string) (*model.Post, error)
+}
+
+// dataStore 结构体, 实现Factory 接口
 type dataStore struct {
 	db *gorm.DB
 }
 
-// dataStore 实现 IStore 接口
-var _ IStore = (*dataStore)(nil)
-
-// NewStore 创建存储层工厂
-func NewStore(db *gorm.DB) IStore {
-	// 确保store 是实例化一次
-	once.Do(func() {
-		S = &dataStore{db}
-	})
-	return S
+// NewFactory 创建存储层工厂
+func NewFactory(db *gorm.DB) Factory {
+	return &dataStore{db: db}
 }
 
 // User() UserStore
