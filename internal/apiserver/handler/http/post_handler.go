@@ -9,66 +9,58 @@ import (
 // PostHandler 定义PostHandler接口
 type PostHandler interface {
 	// createPost 实现创建帖子接口
-	createPost() gin.HandlerFunc
+	CreatePost(c *gin.Context)
 	// deletePost 实现删除帖子接口
-	deletePost() gin.HandlerFunc
+	DeletePost(c *gin.Context)
 	// getPostByID 实现根据ID获取帖子接口
-	getPostByID() gin.HandlerFunc
-	// getPostByPostID 实现根据帖子ID获取帖子接口
-	getPostByPostID() gin.HandlerFunc
+	GetPostByID(c *gin.Context)
 	// listPosts 实现获取帖子列表接口
-	listPosts() gin.HandlerFunc
+	ListPosts(c *gin.Context)
 	// updatePost 实现更新帖子接口
-	updatePost() gin.HandlerFunc
+	UpdatePost(c *gin.Context)
 	// getPostsByUserID 实现根据用户ID获取帖子列表接口
-	getPostsByUserID() gin.HandlerFunc
+	GetPostsByUserID(c *gin.Context)
 }
 
 // postHandler 实现PostHandler接口
 type postHandler struct {
 	logger  *log.Logger
-	postBiz biz.PostBiz
+	postBiz biz.IBiz
 }
 
 // createPost implements PostHandler.
-func (p *postHandler) createPost() gin.HandlerFunc {
+func (p *postHandler) CreatePost(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // deletePost implements PostHandler.
-func (p *postHandler) deletePost() gin.HandlerFunc {
+func (p *postHandler) DeletePost(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // getPostByID implements PostHandler.
-func (p *postHandler) getPostByID() gin.HandlerFunc {
-	panic("unimplemented")
-}
-
-// getPostByPostID implements PostHandler.
-func (p *postHandler) getPostByPostID() gin.HandlerFunc {
+func (p *postHandler) GetPostByID(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // getPostsByUserID implements PostHandler.
-func (p *postHandler) getPostsByUserID() gin.HandlerFunc {
+func (p *postHandler) GetPostsByUserID(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // listPosts implements PostHandler.
-func (p *postHandler) listPosts() gin.HandlerFunc {
+func (p *postHandler) ListPosts(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // updatePost implements PostHandler.
-func (p *postHandler) updatePost() gin.HandlerFunc {
+func (p *postHandler) UpdatePost(c *gin.Context) {
 	panic("unimplemented")
 }
 
 // NewPostHandler 创建PostHandler实例
-func NewPostHandler(logger *log.Logger, postBiz biz.PostBiz) PostHandler {
+func NewPostHandler(logger *log.Logger, postBiz biz.IBiz) PostHandler {
 	return &postHandler{
-		logger:  logger,
 		postBiz: postBiz,
 	}
 }

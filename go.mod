@@ -3,7 +3,7 @@ module github.com/lichenglife/easyblog
 go 1.23.5
 
 require (
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/google/uuid v1.6.0
 	github.com/redis/go-redis/v9 v9.8.0

@@ -95,14 +95,36 @@ func (s *HTTPServer) registerRoutes() error {
 
 	// 健康检查
 	s.engine.GET("/healthz", s.healthcheck)
+	// 存储服务健康检查
+	s.engine.GET("/healthcheck", s.healthcheck)
 
 	// swagger api接口文档
+	//s.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// 业务功能路由规则
-	// v1 := s.engine.Group("/v1")
-	// {
-	// 	//
-	// }
+	// 中间件
+
+	// 非认证接口路由规则
+	v1 := s.engine.Group("/v1")
+	{
+		// 用户服务接口
+
+		v1.POST("/user", s.handler.Users().CreateUser)          // 用户注册
+		v1.POST("/user/login", s.handler.Users().UserLogin)     // 用户登录
+		v1.GET("/user/info", s.handler.Users().UserInfo)        // 获取用户信息
+		v1.POST("/user/logout", s.handler.Users().UserLogout)   // 用户登出
+		v1.GET("/user/list", s.handler.Users().ListUsers)       // 获取用户列表
+		v1.GET("/user/:id", s.handler.Users().GetUserByID)      // 根据 ID 获取用户
+		v1.PUT("/user/:username", s.handler.Users().UpdateUser) // 更新用户
+		v1.DELETE("/user/:id", s.handler.Users().DeleteUser)    // 删除用户
+
+		// 博客服务接口
+		v1.POST("/post", s.handler.Posts().CreatePost)                   // 创建帖子
+		v1.GET("/post/:id", s.handler.Posts().GetPostByID)               // 根据 ID 获取帖子
+		v1.GET("/post/list", s.handler.Posts().ListPosts)                // 获取帖子列表
+		v1.PUT("/post/:id", s.handler.Posts().UpdatePost)                // 更新帖子
+		v1.DELETE("/post/:id", s.handler.Posts().DeletePost)             // 删除帖子
+		v1.GET("/post/user/:userID", s.handler.Posts().GetPostsByUserID) // 根据用户ID获取帖子列表
+	}
 
 	return nil
 }
