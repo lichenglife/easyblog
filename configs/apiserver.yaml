@@ -19,6 +19,8 @@ jwt:
   secret: your-secret-key
   expire: 7200 # 2小时
   issuer: easyblog
+  jwtkey:  Rtg8BPKNEf2mB4mgvKONGPZZQSaJWNLijxR42qRgq0iBb5 # 密钥
+  identityKey: root # 身份标识
 
 log:
   level: info

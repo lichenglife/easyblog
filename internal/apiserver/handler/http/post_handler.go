@@ -24,7 +24,6 @@ type PostHandler interface {
 
 // postHandler 实现PostHandler接口
 type postHandler struct {
-	logger  *log.Logger
 	postBiz biz.IBiz
 }
 

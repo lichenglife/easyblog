@@ -2,9 +2,14 @@ package handler
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/lichenglife/easyblog/internal/apiserver/biz"
 	"github.com/lichenglife/easyblog/internal/apiserver/model"
+	"github.com/lichenglife/easyblog/internal/pkg/core"
+	"github.com/lichenglife/easyblog/internal/pkg/errno"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
+	"github.com/lichenglife/easyblog/internal/pkg/validation"
+	"go.uber.org/zap"
 )
 
 // UserHandler 用户相关接口
@@ -36,15 +41,15 @@ type UserHandler interface {
 
 // userHandler 实现了 UserHandler 接口
 type userHandler struct {
-	logger  *log.Logger
-	userBiz biz.IBiz
+	logger *log.Logger
+	biz    biz.IBiz
 }
 
 // NewUserHandler 创建 UserHandler 实例
 func NewUserHandler(logger *log.Logger, biz biz.IBiz) UserHandler {
 	return &userHandler{
-		logger:  logger,
-		userBiz: biz,
+		logger: logger,
+		biz:    biz,
 	}
 }
 
@@ -55,19 +60,62 @@ func (u *userHandler) CreateUser(c *gin.Context) {
 	// 解析请求参数
 	var req model.CreateUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		// 检查是否为校验错误
+		if validationErrors, ok := err.(validator.ValidationErrors); ok {
+			log.Log.Error("CreateUser: validation failed", zap.Any("errors", validation.ValidationErrors(validationErrors)))
+			var errors map[string]string = make(map[string]string)
+			errors = validation.ValidationErrors(validationErrors)
+			core.WriteResponse(c, nil, errors)
+			// core.WriteResponse(c, gin.H{
+			// 	"code":    10001,
+			// 	"message": "参数校验失败",
+			// 	"errors":  validation.ValidationErrors(validationErrors),
+			// }, nil)
+			return
+		}
+
+		// 其他错误
+		log.Log.Error("CreateUser: failed to bind JSON", zap.Error(err))
+		core.WriteResponse(c, err, nil)
 		return
 	}
+
+	// 创建用户
+	var user *model.UserInfo
+	user, err := u.biz.UserV1().CreateUser(c, &req)
+	if err != nil {
+		log.Log.Error("CreateUser: failed to create user", zap.Error(err))
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, nil, user)
 }
 
 // DeleteUser implements UserHandler.
 func (u *userHandler) DeleteUser(c *gin.Context) {
-	panic("unimplemented")
+	// TODO 判断当前用户是否admin
+
+	username := c.Param("username")
+	err := u.biz.UserV1().DeleteUser(c, username)
+	if err != nil {
+		log.Log.Error("删除用户失败", zap.Error(err))
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, nil, "删除成功")
+
 }
 
 // GetUserByID implements UserHandler.
 func (u *userHandler) GetUserByID(c *gin.Context) {
-	panic("unimplemented")
+	userID := c.Param("id")
+	userInfo, err := u.biz.UserV1().GetUserByID(c, userID)
+	if err != nil {
+		log.Log.Error("获取用户信息失败", zap.Error(err))
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, nil, userInfo)
 }
 
 // GetUserInfo implements UserHandler.
@@ -77,7 +125,27 @@ func (u *userHandler) GetUserInfo(c *gin.Context) {
 
 // ListUsers implements UserHandler.
 func (u *userHandler) ListUsers(c *gin.Context) {
-	panic("unimplemented")
+	// 获取分页查询参数
+	// 1. 获取当前页码
+	limit := c.Query("limit")
+	page := c.Query("page")
+	// 从当前c 中获取 limit 、page
+	if limit == "" {
+		limit = "10" // 默认每页10条记录
+	}
+	if page == "" {
+
+		page = "1" // 默认第一页
+	}
+
+	userList, err := u.biz.UserV1().ListUsers(c, 1, 10)
+	if err != nil {
+		log.Log.Error("获取用户列表失败", zap.Error(err))
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, nil, userList)
+
 }
 
 // ResetPassword implements UserHandler.
@@ -87,7 +155,20 @@ func (u *userHandler) ResetPassword(c *gin.Context) {
 
 // UpdateUser implements UserHandler.
 func (u *userHandler) UpdateUser(c *gin.Context) {
-	panic("unimplemented")
+	var updateUserModel model.UpdateUser
+	if err := c.ShouldBindJSON(&updateUserModel); err != nil {
+		errmessages := validation.ValidationErrors(err)
+		core.WriteResponse(c, nil, errmessages)
+		return
+	}
+	// 更新用户
+	err := u.biz.UserV1().UpdateUser(c, &updateUserModel)
+	if err != nil {
+		log.Log.Error("更新用户失败", zap.Error(err))
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, nil, "更新成功")
 }
 
 // UserInfo implements UserHandler.
@@ -97,7 +178,22 @@ func (u *userHandler) UserInfo(c *gin.Context) {
 
 // UserLogin implements UserHandler.
 func (u *userHandler) UserLogin(c *gin.Context) {
-	panic("unimplemented")
+	var userLogin model.UserLoginRequest
+
+	if err := c.ShouldBindJSON(&userLogin); err != nil {
+		errmessages := validation.ValidationErrors(err)
+		core.WriteResponse(c, errno.ErrInvalidParams, errmessages)
+		return
+	}
+	userLoginResponse, err := u.biz.UserV1().UserLogin(c, userLogin)
+	if err != nil {
+		log.Log.Error("用户登录失败", zap.Error(err))
+		core.WriteResponse(c, err, nil)
+		return
+	}
+
+	core.WriteResponse(c, nil, userLoginResponse)
+
 }
 
 // UserLogout implements UserHandler.

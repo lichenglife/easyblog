@@ -104,6 +104,8 @@ var (
 	ErrInvalidPassword   = New(20005, "密码格式不正确", http.StatusBadRequest)
 	ErrInvalidPhone      = New(20006, "手机号格式不正确", http.StatusBadRequest)
 	ErrInvalidEmail      = New(20007, "邮箱格式不正确", http.StatusBadRequest)
+	ErrEncryptPassword   = New(20008, "密码加密失败", http.StatusInternalServerError)
+	ErrGenerateToken     = New(20009, "生成Token失败", http.StatusInternalServerError)
 
 	// 博客相关错误码 (3xxxx)
 	ErrPostNotFound       = New(30001, "博客不存在", http.StatusNotFound)

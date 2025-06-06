@@ -86,6 +86,7 @@ func (s *HTTPServer) initEngine() error {
 		// 跨域
 		middleware.CORS(),
 	)
+
 	s.engine = engine
 
 	return nil
@@ -112,7 +113,7 @@ func (s *HTTPServer) registerRoutes() error {
 		v1.POST("/user/login", s.handler.Users().UserLogin)     // 用户登录
 		v1.GET("/user/info", s.handler.Users().UserInfo)        // 获取用户信息
 		v1.POST("/user/logout", s.handler.Users().UserLogout)   // 用户登出
-		v1.GET("/user/list", s.handler.Users().ListUsers)       // 获取用户列表
+		v1.GET("/user", s.handler.Users().ListUsers)            // 获取用户列表
 		v1.GET("/user/:id", s.handler.Users().GetUserByID)      // 根据 ID 获取用户
 		v1.PUT("/user/:username", s.handler.Users().UpdateUser) // 更新用户
 		v1.DELETE("/user/:id", s.handler.Users().DeleteUser)    // 删除用户

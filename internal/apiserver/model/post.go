@@ -9,8 +9,8 @@ type Post struct {
 	PostID   string    `gorm:"column:postID;type:varchar(36);not null;uniqueIndex:post.postID;comment:帖子唯一 ID" json:"postID"`
 	Content  string    `gorm:"column:content;type:varchar(255);not null;comment:内容" json:"content"`
 	Title    string    `gorm:"column:title;type:varchar(255);not null;comment:标题" json:"title"`
-	CreateAt time.Time `gorm:"column:createAt;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:创建时间" json:"createAt"`
-	UpdateAt time.Time `gorm:"column:updateAt;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:更新时间" json:"updateAt"`
+	CreatedAt time.Time `gorm:"column:createdAt;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:创建时间" json:"createAt"`
+	UpdatedAt time.Time `gorm:"column:updatedAt;type:datetime;not null;default:CURRENT_TIMESTAMP;comment:更新时间" json:"updateAt"`
 }
 
 // TableName 表名

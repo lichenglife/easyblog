@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,7 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/lichenglife/easyblog/internal/pkg/errno"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
+	"github.com/lichenglife/easyblog/internal/pkg/token"
 )
 
 // RequestID 生成请求ID
@@ -106,10 +108,27 @@ func RateLimit() gin.HandlerFunc {
 	}
 }
 
-// Auth 认证中间件
-// func Auth() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		// TODO: 实现认证逻辑
-// 		c.Next()
-// 	}
-// }
+// AuthnMiddleware权限认证中间件
+func AuthnMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// 从请求头中获取token
+		authorization := ctx.GetHeader("Authorization")
+		if authorization == "" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+			ctx.Abort()
+			return
+		}
+		splits := strings.Split(authorization, " ")
+		if len(splits) != 2 && splits[0] != "Bearer" {
+			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "未授权"})
+		}
+		// 验证token的有效性
+		tokenString := splits[1]
+		identityKey, err := token.Parse(tokenString, "Rtg8BPKNEf2mB4mgvKONGPZZQSaJWNLijxR42qRgq0iBb5")
+		if err != nil {
+			return
+		}
+		// 验证通过后，将用户信息存储到上下文中
+		ctx.Set("userID", identityKey)
+	}
+}

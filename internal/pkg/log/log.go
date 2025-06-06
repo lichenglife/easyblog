@@ -12,6 +12,8 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
+var Log *Logger
+
 // Logger 表示日志实例
 type Logger struct {
 	*zap.Logger
@@ -58,8 +60,9 @@ func NewLogger(config *viper.Viper) (*Logger, error) {
 	)
 
 	// 创建日志实例
-	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
-	return &Logger{logger}, nil
+	zaplogger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
+	Log = &Logger{zaplogger}
+	return Log, nil
 }
 
 // getLogLevel 获取日志级别
