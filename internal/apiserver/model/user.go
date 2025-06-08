@@ -59,8 +59,8 @@ type UserLoginResponse struct {
 }
 
 type ChangePasswordRequest struct {
-	OldPassword string `json:"oldPassword" binding:"required,min=6,max=30"`
-	NewPassword string `json:"newPassword" binding:"required,min=6,max=30"`
+	OldPassword string `json:"oldPassword" binding:"required,password,min=6,max=30"`
+	NewPassword string `json:"newPassword" binding:"required,password,min=6,max=30"`
 }
 
 // 查询用户列表请求结构体

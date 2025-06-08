@@ -1,0 +1,614 @@
+basePath: /
+definitions:
+  core.ErrResponse:
+    properties:
+      code:
+        description: 业务状态码
+        type: integer
+      message:
+        description: 消息
+        type: string
+    type: object
+  model.ChangePasswordRequest:
+    properties:
+      newPassword:
+        maxLength: 30
+        minLength: 6
+        type: string
+      oldPassword:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - newPassword
+    - oldPassword
+    type: object
+  model.CreatePostRequest:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+      userID:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  model.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      nickname:
+        maxLength: 30
+        minLength: 2
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - nickname
+    - password
+    - phone
+    - username
+    type: object
+  model.ListPostResponse:
+    properties:
+      hasMore:
+        type: boolean
+      posts:
+        items:
+          $ref: '#/definitions/model.Post'
+        type: array
+      totalCount:
+        type: integer
+    type: object
+  model.ListUserResponse:
+    properties:
+      hasMore:
+        type: boolean
+      totalCount:
+        type: integer
+      users:
+        items:
+          $ref: '#/definitions/model.UserInfo'
+        type: array
+    type: object
+  model.Post:
+    properties:
+      content:
+        type: string
+      createdAt:
+        type: string
+      id:
+        type: integer
+      postID:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: string
+    type: object
+  model.UpdatePostRequest:
+    properties:
+      content:
+        type: string
+      postID:
+        type: string
+      title:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  model.UpdateUser:
+    properties:
+      email:
+        type: string
+      nickname:
+        maxLength: 30
+        minLength: 2
+        type: string
+      phone:
+        type: string
+    type: object
+  model.UserInfo:
+    properties:
+      createdAt:
+        type: string
+      email:
+        type: string
+      nickname:
+        type: string
+      phone:
+        type: string
+      postCount:
+        type: integer
+      updatedAt:
+        type: string
+      userID:
+        type: string
+      username:
+        type: string
+    type: object
+  model.UserLoginRequest:
+    properties:
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  model.UserLoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/model.UserInfo'
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: lichenglife@gmail.com
+    name: lichenglife
+    url: https://github.com/lichenglife/easyblog
+  description: A simple blog server written in Go.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: EasyBlog API
+  version: "1.0"
+paths:
+  /v1/posts:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取博客文章列表
+      parameters:
+      - default: 0
+        description: 起始位置
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 列表数量
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ListPostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 获取博客文章列表
+      tags:
+      - posts
+    post:
+      consumes:
+      - application/json
+      description: 创建一篇新的博客文章
+      parameters:
+      - description: 创建文章请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 创建博客文章
+      tags:
+      - posts
+  /v1/posts/{postID}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定 ID 的博客文章
+      parameters:
+      - description: 文章ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 博客删除成功
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 删除博客文章
+      tags:
+      - posts
+    get:
+      consumes:
+      - application/json
+      description: 获取指定 ID 的博客文章
+      parameters:
+      - description: 文章ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 获取博客文章
+      tags:
+      - posts
+    put:
+      consumes:
+      - application/json
+      description: 更新指定 ID 的博客文章
+      parameters:
+      - description: 文章ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      - description: 更新文章请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UpdatePostRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 更新博客文章
+      tags:
+      - posts
+  /v1/posts/user/{userID}:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取指定用户的博客文章列表
+      parameters:
+      - description: 用户名
+        in: path
+        name: userID
+        required: true
+        type: string
+      - default: 0
+        description: 起始位置
+        in: query
+        name: offset
+        type: integer
+      - default: 10
+        description: 列表数量
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ListPostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 获取用户的博客文章列表
+      tags:
+      - posts
+  /v1/users:
+    get:
+      consumes:
+      - application/json
+      description: 分页获取用户列表
+      parameters:
+      - default: 0
+        description: 起始位置
+        in: query
+        name: page
+        type: integer
+      - default: 10
+        description: 列表数量
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.ListUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 获取用户列表
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新用户
+      parameters:
+      - description: 创建用户请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UserLoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      summary: 创建用户
+      tags:
+      - users
+  /v1/users/{name}:
+    delete:
+      consumes:
+      - application/json
+      description: 删除指定用户名的用户
+      parameters:
+      - description: 用户名
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 用户删除成功
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 删除用户
+      tags:
+      - users
+  /v1/users/{username}:
+    get:
+      consumes:
+      - application/json
+      description: 获取指定用户名的用户信息
+      parameters:
+      - description: 用户名
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UserInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 获取用户信息
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: 更新指定用户名的用户信息
+      parameters:
+      - description: 用户名
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: 更新用户请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateUser'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UserInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 更新用户信息
+      tags:
+      - users
+  /v1/users/{username}/password:
+    put:
+      consumes:
+      - application/json
+      description: 修改指定用户的密码
+      parameters:
+      - description: 用户名
+        in: path
+        name: username
+        required: true
+        type: string
+      - description: 修改密码请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.ChangePasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 密码修改成功
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      security:
+      - Bearer: []
+      summary: 修改密码
+      tags:
+      - users
+  /v1/users/login:
+    post:
+      consumes:
+      - application/json
+      description: 通过用户名和密码登录
+      parameters:
+      - description: 登录请求参数
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.UserInfo'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/core.ErrResponse'
+      summary: 用户登录
+      tags:
+      - users
+securityDefinitions:
+  Bearer:
+    description: Bearer token authentication
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

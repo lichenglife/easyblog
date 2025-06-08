@@ -45,7 +45,10 @@ func (u *users) GetByUsername(ctx context.Context, username string) (*model.User
 // Update 更新用户
 func (u *users) Update(ctx context.Context, user *model.User) error {
 
-	return u.db.Save(user).Error
+	return u.db.Model(&user).Where("username = ?", user.Username).Updates(map[string]interface{}{
+		"password": user.Password,
+	}).Error
+
 }
 
 // Delete 删除用户

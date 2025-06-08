@@ -7,11 +7,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/lichenglife/easyblog/docs"
 	handler "github.com/lichenglife/easyblog/internal/apiserver/handler/http"
 	"github.com/lichenglife/easyblog/internal/app"
 	"github.com/lichenglife/easyblog/internal/pkg/core"
 	"github.com/lichenglife/easyblog/internal/pkg/middleware"
 	"github.com/spf13/viper"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
 )
 
@@ -101,6 +104,8 @@ func (s *HTTPServer) registerRoutes() error {
 	s.engine.GET("/readyz", s.HealthCheck)
 
 	// swagger api接口文档
+	url := ginSwagger.URL("/swagger/doc.json") // swagger json 文档的路径
+	s.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler, url))
 
 	// 业务功能路由规则
 	v1 := s.engine.Group("/v1")

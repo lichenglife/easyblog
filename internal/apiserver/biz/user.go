@@ -222,14 +222,21 @@ func (u *userBiz) ResetUserPassword(ctx context.Context, username, oldPassword, 
 		u.logger.Info("用户不存在", zap.String("username", username))
 		return err
 	}
-	if user.Password != oldPassword {
+	// 2. 校验旧密码是否正确
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(oldPassword)); err != nil {
 		u.logger.Info("用户原密码错误,不允许更新")
 		return errno.ErrOldPasswordIncorrect
+	}
+	// 3. 加密新密码
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		u.logger.Error("加密新密码失败", zap.Error(err))
+		return err
 	}
 
 	updateUser := &model.User{
 		Username: username,
-		Password: newPassword,
+		Password: string(hashedPassword),
 	}
 	if err := u.store.User().Update(ctx, updateUser); err != nil {
 		u.logger.Error("更新密码失败", zap.Error(err))

@@ -59,12 +59,22 @@ func NewUserHandler(logger *log.Logger, biz biz.UserBiz, authStrategy middleware
 
 var _ UserHandler = (*userHandler)(nil)
 
+// @Summary      创建用户
+// @Description  创建一个新用户
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request body model.CreateUserRequest true "创建用户请求参数"
+// @Success      200  {object}  model.UserLoginResponse
+// @Failure      400  {object}  core.ErrResponse
+// @Failure      500  {object}  core.ErrResponse
+// @Router       /v1/users [post]
 // CreateUser implements UserHandler.
 func (u *userHandler) CreateUser(c *gin.Context) {
 
 	// 获取请求参数
-	var userRequest *model.CreateUserRequest
-	if err := c.ShouldBindJSON(&userRequest); err != nil {
+	var userRequest model.CreateUserRequest
+	if err := core.BindAndValid(c, &userRequest); err != nil {
 		u.logger.Error("CreateUser bind json error", zap.Error(err))
 		core.WriteResponse(c, err, nil)
 		return
@@ -91,6 +101,17 @@ func (u *userHandler) CreateUser(c *gin.Context) {
 
 }
 
+// @Summary      删除用户
+// @Description  删除指定用户名的用户
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        name path string true "用户名"
+// @Success      200  {object}  string "用户删除成功"
+// @Failure      400  {object}  core.ErrResponse
+// @Failure      500  {object}  core.ErrResponse
+// @Security     Bearer
+// @Router       /v1/users/{name} [delete]
 // DeleteUser implements UserHandler.
 func (u *userHandler) DeleteUser(c *gin.Context) {
 	// 根据用户名删除用户
@@ -104,11 +125,25 @@ func (u *userHandler) DeleteUser(c *gin.Context) {
 	username := c.Query("username")
 
 	if err := u.userBiz.DeleteUser(c, username); err != nil {
-
+		u.logger.Logger.Error("删除用户失败", zap.Error(err))
+		core.WriteResponse(c, err, nil)
+		return
 	}
+	core.WriteResponse(c, nil, "删除成功")
 
 }
 
+// @Summary      获取用户信息
+// @Description  获取指定用户名的用户信息
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        username path string true "用户名"
+// @Success      200  {object}  model.UserInfo
+// @Failure      400  {object}  core.ErrResponse
+// @Failure      500  {object}  core.ErrResponse
+// @Security     Bearer
+// @Router       /v1/users/{username} [get]
 // GetUserByID implements UserHandler.
 func (u *userHandler) GetUserByUsername(c *gin.Context) {
 	// 获取请求参数
@@ -136,6 +171,18 @@ func (u *userHandler) GetUserInfo(c *gin.Context) {
 
 }
 
+// @Summary      获取用户列表
+// @Description  分页获取用户列表
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        page query int false "起始位置" default(0)
+// @Param        limit query int false "列表数量" default(10)
+// @Success      200  {object}  model.ListUserResponse
+// @Failure      400  {object}  core.ErrResponse
+// @Failure      500  {object}  core.ErrResponse
+// @Security     Bearer
+// @Router       /v1/users [get]
 // ListUsers implements UserHandler.
 func (u *userHandler) ListUsers(c *gin.Context) {
 
@@ -151,13 +198,25 @@ func (u *userHandler) ListUsers(c *gin.Context) {
 	core.WriteResponse(c, nil, users)
 }
 
+// @Summary      修改密码
+// @Description  修改指定用户的密码
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        username path string true "用户名"
+// @Param        request body model.ChangePasswordRequest true "修改密码请求参数"
+// @Success      200  {object}  string "密码修改成功"
+// @Failure      400  {object}  core.ErrResponse
+// @Failure      500  {object}  core.ErrResponse
+// @Security     Bearer
+// @Router       /v1/users/{username}/password [put]
 // ResetPassword implements UserHandler.
 func (u *userHandler) ResetPassword(c *gin.Context) {
 
-	username := c.Query("username")
+	username := c.Param("username")
 
-	var userRequest *model.ChangePasswordRequest
-	if err := c.ShouldBindJSON(&userRequest); err != nil {
+	var userRequest model.ChangePasswordRequest
+	if err := core.BindAndValid(c, &userRequest); err != nil {
 		u.logger.Error("ResetPassword bind json error", zap.Error(err))
 		core.WriteResponse(c, err, nil)
 		return
@@ -171,13 +230,25 @@ func (u *userHandler) ResetPassword(c *gin.Context) {
 	core.WriteResponse(c, nil, nil)
 }
 
+// @Summary      更新用户信息
+// @Description  更新指定用户名的用户信息
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        username path string true "用户名"
+// @Param        request body model.UpdateUser true "更新用户请求参数"
+// @Success      200  {object}  model.UserInfo
+// @Failure      400  {object}  core.ErrResponse
+// @Failure      500  {object}  core.ErrResponse
+// @Security     Bearer
+// @Router       /v1/users/{username} [put]
 // UpdateUser implements UserHandler.
 func (u *userHandler) UpdateUser(c *gin.Context) {
 	username := c.Param("username")
 
 	var user *model.UpdateUser
 
-	if err := c.ShouldBindJSON(&user); err != nil {
+	if err := core.BindAndValid(c, &user); err != nil {
 		u.logger.Logger.Error("UpdateUser bind json error", zap.Error(err))
 		core.WriteResponse(c, err, nil)
 		return
@@ -191,6 +262,16 @@ func (u *userHandler) UpdateUser(c *gin.Context) {
 	core.WriteResponse(c, nil, "更新成功")
 }
 
+// @Summary      用户登录
+// @Description  通过用户名和密码登录
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        request body model.UserLoginRequest true "登录请求参数"
+// @Success      200  {object}  model.UserInfo
+// @Failure      400  {object}  core.ErrResponse
+// @Failure      500  {object}  core.ErrResponse
+// @Router       /v1/users/login [post]
 // UserLogin implements UserHandler.
 func (u *userHandler) UserLogin(c *gin.Context) {
 	// 账号密码校验
