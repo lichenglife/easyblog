@@ -3,10 +3,12 @@ package app
 import (
 	"fmt"
 
+	biz "github.com/lichenglife/easyblog/internal/apiserver/biz/v1/user"
 	"github.com/lichenglife/easyblog/internal/apiserver/store"
 	"github.com/lichenglife/easyblog/internal/pkg/cache"
 	"github.com/lichenglife/easyblog/internal/pkg/db"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
+	"github.com/lichenglife/easyblog/internal/pkg/middleware"
 
 	"github.com/spf13/viper"
 )
@@ -38,6 +40,9 @@ type IApp interface {
 
 	// 服务接口
 
+	// 获取认证服务
+	GetAuthStrategy() middleware.AuthStrategy
+
 	// 关闭应用
 	Close() error
 }
@@ -59,7 +64,7 @@ type App struct {
 	//  存储
 	store store.IStore
 	//  认证服务
-
+	authStrategy middleware.AuthStrategy
 }
 
 // 创建App实例
@@ -94,6 +99,10 @@ func NewAppWithOptions(config *viper.Viper, option *AppOptions) (IApp, error) {
 	err = app.initStoreFactory()
 	if err != nil {
 		return nil, fmt.Errorf("初始化存储工厂失败%v", err)
+	}
+	err = app.initAuthStrategy()
+	if err != nil {
+		return nil, fmt.Errorf("初始化认证服务失败%v", err)
 	}
 
 	return app, nil
@@ -133,6 +142,14 @@ func (app *App) initStoreFactory() error {
 	app.store = store.NewStore(app.Db.DB)
 	return nil
 }
+
+// init初始化认证服务
+func (app *App) initAuthStrategy() error {
+	userStore := app.GetStoreFactory()
+	userbiz := biz.NewUserBiz(userStore.User())
+	app.authStrategy = middleware.NewJWTStrategy(userbiz)
+	return nil
+}
 func (app *App) Close() error {
 
 	if app.Db != nil {
@@ -170,3 +187,9 @@ func (app *App) GetStoreFactory() store.IStore {
 }
 
 // 服务接口
+
+//认证服务
+
+func (app *App) GetAuthStrategy() middleware.AuthStrategy {
+	return app.authStrategy
+}

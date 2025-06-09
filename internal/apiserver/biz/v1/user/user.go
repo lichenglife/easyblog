@@ -8,7 +8,7 @@ import (
 	"github.com/lichenglife/easyblog/internal/apiserver/model"
 	"github.com/lichenglife/easyblog/internal/apiserver/store"
 	"github.com/lichenglife/easyblog/internal/pkg/errno"
-	"github.com/lichenglife/easyblog/internal/pkg/token"
+	"github.com/lichenglife/easyblog/internal/pkg/log"
 	"github.com/lichenglife/easyblog/internal/pkg/utils/authn"
 	genid "github.com/lichenglife/easyblog/internal/pkg/utils/genID"
 )
@@ -28,7 +28,10 @@ type UserBiz interface {
 	// List 获取用户列表
 	ListUsers(ctx context.Context, page, pageSize int) (*model.ListUserResponse, error)
 	// UserLogin 用户登录
-	UserLogin(ctx context.Context, user model.UserLoginRequest) (*model.UserLoginResponse, error)
+	UserLogin(ctx context.Context, user model.UserLoginRequest) (*model.UserInfo, error)
+
+	// ChangePassword 更新用户密码
+	ChangePassword(ctx context.Context, userID string, user model.ChangePasswordRequest) error
 }
 
 func NewUserBiz(store store.UserStore) UserBiz {
@@ -44,8 +47,32 @@ type userBiz struct {
 	store store.UserStore
 }
 
+// ChangePassword implements UserBiz.
+func (u *userBiz) ChangePassword(ctx context.Context, userID string, req model.ChangePasswordRequest) error {
+	// 1、查询用户
+	user, err := u.store.GetByID(ctx, userID)
+	if err != nil {
+		return err
+	}
+	// 2、判断密码是否一致
+	if err := authn.Compare(user.Password, req.OldPassword); err != nil {
+		return errno.ErrPasswordIncorrect
+	}
+	// 3、更新用户密码
+	updateUser := model.User{
+		UserID:   userID,
+		Password: req.NewPassword,
+	}
+	if err := u.store.Update(ctx, &updateUser); err != nil {
+		log.Log.Error(err.Error())
+		return err
+	}
+	return nil
+
+}
+
 // UserLogin implements UserBiz.
-func (u *userBiz) UserLogin(ctx context.Context, req model.UserLoginRequest) (*model.UserLoginResponse, error) {
+func (u *userBiz) UserLogin(ctx context.Context, req model.UserLoginRequest) (*model.UserInfo, error) {
 	// 1. 根据用户名查询用户是否存在
 	user, err := u.store.GetByUsername(ctx, req.Username)
 	if err != nil {
@@ -59,19 +86,19 @@ func (u *userBiz) UserLogin(ctx context.Context, req model.UserLoginRequest) (*m
 	if err := authn.Compare(user.Password, req.Password); err != nil {
 		return nil, errno.ErrPasswordIncorrect // 密码错误
 	}
-	tokenString, _, err := token.Sign(user.UserID)
-	if err != nil {
-		return nil, errno.ErrGenerateToken // 令牌生成失败
-	}
 
 	userInfo := &model.UserInfo{
-		UserID: user.UserID,
+		UserID:    user.UserID,
+		Username:  user.Username,
+		UpdatedAt: user.UpdatedAt,
 	}
 	// 4. 构造登录响应（可根据需求补充其他用户信息）
-	return &model.UserLoginResponse{
-		User:  *userInfo,
-		Token: tokenString,
-	}, nil
+	// return &model.UserLoginResponse{
+	// 	User:  *userInfo,
+	// 	Token: tokenString,
+	// }, nil
+
+	return userInfo, nil
 
 }
 
@@ -106,7 +133,7 @@ func (u *userBiz) CreateUser(ctx context.Context, req *model.CreateUserRequest) 
 	user.Password = password
 	// 保存用户到数据库
 	if err := u.store.Create(ctx, user); err != nil {
-		return nil, errno.ErrDatabase
+		return nil, err
 	}
 	userInfo := &model.UserInfo{
 		UserID:   user.UserID,
@@ -120,13 +147,13 @@ func (u *userBiz) CreateUser(ctx context.Context, req *model.CreateUserRequest) 
 }
 
 // DeleteUser implements UserBiz.
-func (u *userBiz) DeleteUser(ctx context.Context, username string) error {
+func (u *userBiz) DeleteUser(ctx context.Context, userID string) error {
 	//  判断用户是否存在
-	_, err := u.store.GetByUsername(ctx, username)
+	_, err := u.store.GetByID(ctx, userID)
 	if err != nil {
 		return err
 	}
-	err = u.store.Delete(ctx, username)
+	err = u.store.Delete(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -174,7 +201,7 @@ func (u *userBiz) ListUsers(ctx context.Context, page int, pageSize int) (*model
 	if err != nil {
 		return nil, err
 	}
-	userInfoList := make([]model.UserInfo, len(userList))
+	userInfoList := make([]model.UserInfo, 0, len(userList))
 	// TODO 并发执行每个用户的博客信息
 	for _, user := range userList {
 		userInfoList = append(userInfoList, model.UserInfo{

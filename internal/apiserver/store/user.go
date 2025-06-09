@@ -19,7 +19,7 @@ type UserStore interface {
 	// Update 更新用户
 	Update(ctx context.Context, user *model.User) error
 	// Delete 删除用户
-	Delete(ctx context.Context, username string) error
+	Delete(ctx context.Context, userID string) error
 	// List 获取用户列表
 	List(ctx context.Context, page, pageSize int) ([]*model.User, int64, error)
 }
@@ -62,18 +62,20 @@ func (u *users) GetByUsername(ctx context.Context, username string) (*model.User
 
 // Update 更新用户
 func (u *users) Update(ctx context.Context, user *model.User) error {
-	// 更新 user对象
-	if err := u.db.WithContext(ctx).Updates(user).Error; err != nil {
+	// 对于User 的非零字段进行更新
+	err := u.db.WithContext(ctx).Model(&model.User{}).Where("userID = ?", user.UserID).Updates(user).Error
+	if err != nil {
 		log.Log.Error("failed to update object", zap.Error(err))
 		return err
 	}
+
 	return nil
 
 }
 
 // Delete 删除用户
-func (u *users) Delete(ctx context.Context, username string) error {
-	return u.db.WithContext(ctx).Delete(&model.User{}).Where("username = ?", username).Error
+func (u *users) Delete(ctx context.Context, userID string) error {
+	return u.db.WithContext(ctx).Where("userID = ?", userID).Delete(&model.User{}).Error
 }
 
 // List 获取用户列表
@@ -89,5 +91,5 @@ func (u *users) List(ctx context.Context, page, pageSize int) ([]*model.User, in
 	if err != nil {
 		return nil, 0, err
 	}
-	return users, 0, nil
+	return users, total, nil
 }

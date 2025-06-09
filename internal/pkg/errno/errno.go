@@ -88,7 +88,8 @@ var (
 	// ErrInvalidToken 表示无效的Token
 	ErrInvalidToken = New(10008, "无效的Token", http.StatusUnauthorized)
 	// ErrTokenExpired 表示Token已过期
-	ErrTokenExpired = New(10009, "Token已过期", http.StatusUnauthorized)
+	ErrTokenExpired    = New(10009, "Token已过期", http.StatusUnauthorized)
+	ErrEncryptPassword = New(10010, "用户密码加密失败", http.StatusUnauthorized)
 
 	ErrBind    = New(100010, "参数错误", http.StatusBadGateway)
 	ErrUnknown = New(99999, "未知错误", http.StatusBadRequest)
@@ -104,8 +105,7 @@ var (
 	ErrInvalidPassword   = New(20005, "密码格式不正确", http.StatusBadRequest)
 	ErrInvalidPhone      = New(20006, "手机号格式不正确", http.StatusBadRequest)
 	ErrInvalidEmail      = New(20007, "邮箱格式不正确", http.StatusBadRequest)
-	ErrEncryptPassword   = New(20008, "密码加密失败", http.StatusInternalServerError)
-	ErrGenerateToken     = New(20009, "生成Token失败", http.StatusInternalServerError)
+	ErrGenerateToken     = New(20008, "生成token失败", http.StatusUnauthorized)
 
 	// 博客相关错误码 (3xxxx)
 	ErrPostNotFound       = New(30001, "博客不存在", http.StatusNotFound)

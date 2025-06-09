@@ -8,6 +8,7 @@ import (
 	"github.com/lichenglife/easyblog/internal/pkg/core"
 	"github.com/lichenglife/easyblog/internal/pkg/errno"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
+	"github.com/lichenglife/easyblog/internal/pkg/middleware"
 	"github.com/lichenglife/easyblog/internal/pkg/validation"
 	"go.uber.org/zap"
 )
@@ -43,13 +44,17 @@ type UserHandler interface {
 type userHandler struct {
 	logger *log.Logger
 	biz    biz.IBiz
+
+	authStrategy middleware.AuthStrategy
 }
 
 // NewUserHandler 创建 UserHandler 实例
 func NewUserHandler(logger *log.Logger, biz biz.IBiz) UserHandler {
+	authstraty := middleware.NewJWTStrategy(biz.UserV1())
 	return &userHandler{
-		logger: logger,
-		biz:    biz,
+		logger:       logger,
+		biz:          biz,
+		authStrategy: authstraty,
 	}
 }
 
@@ -94,9 +99,13 @@ func (u *userHandler) CreateUser(c *gin.Context) {
 // DeleteUser implements UserHandler.
 func (u *userHandler) DeleteUser(c *gin.Context) {
 	// TODO 判断当前用户是否admin
-
-	username := c.Param("username")
-	err := u.biz.UserV1().DeleteUser(c, username)
+	currentUser, ok := c.Get("username")
+	if !ok || currentUser != "root" {
+		core.WriteResponse(c, errno.ErrUnauthorized, nil)
+		return
+	}
+	userID := c.Param("id")
+	err := u.biz.UserV1().DeleteUser(c, userID)
 	if err != nil {
 		log.Log.Error("删除用户失败", zap.Error(err))
 		core.WriteResponse(c, err, nil)
@@ -127,18 +136,10 @@ func (u *userHandler) GetUserInfo(c *gin.Context) {
 func (u *userHandler) ListUsers(c *gin.Context) {
 	// 获取分页查询参数
 	// 1. 获取当前页码
-	limit := c.Query("limit")
-	page := c.Query("page")
+	limit := core.GetLimitParam(c)
+	page := core.GetPageParam(c)
 	// 从当前c 中获取 limit 、page
-	if limit == "" {
-		limit = "10" // 默认每页10条记录
-	}
-	if page == "" {
-
-		page = "1" // 默认第一页
-	}
-
-	userList, err := u.biz.UserV1().ListUsers(c, 1, 10)
+	userList, err := u.biz.UserV1().ListUsers(c, page, limit)
 	if err != nil {
 		log.Log.Error("获取用户列表失败", zap.Error(err))
 		core.WriteResponse(c, err, nil)
@@ -150,18 +151,47 @@ func (u *userHandler) ListUsers(c *gin.Context) {
 
 // ResetPassword implements UserHandler.
 func (u *userHandler) ResetPassword(c *gin.Context) {
-	panic("unimplemented")
+	// 1、解析参数
+	userID := c.Param("userID")
+	var req model.ChangePasswordRequest
+	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
+		core.WriteResponse(c, errno.ErrInvalidParams, nil)
+		return
+	}
+	currentUser, ok := c.Get("userID")
+	if !ok || currentUser != userID {
+		core.WriteResponse(c, errno.ErrUnauthorized, nil)
+		return
+	}
+	// 2、请求biz进行密码跟新
+	err := u.biz.UserV1().ChangePassword(c, userID, req)
+	if err != nil {
+		log.Log.Error("更新用户失败", zap.Error(err))
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, errno.OK, nil)
+
 }
 
 // UpdateUser implements UserHandler.
 func (u *userHandler) UpdateUser(c *gin.Context) {
+	//1、解析参数
+	userID := c.Param("userID")
+	currentUser, ok := c.Get("userID")
+	if !ok || currentUser != userID {
+		core.WriteResponse(c, errno.ErrUnauthorized, nil)
+		return
+	}
+
 	var updateUserModel model.UpdateUser
 	if err := c.ShouldBindJSON(&updateUserModel); err != nil {
 		errmessages := validation.ValidationErrors(err)
 		core.WriteResponse(c, nil, errmessages)
 		return
 	}
-	// 更新用户
+	updateUserModel.UserID = userID
+	// 2、更新用户
 	err := u.biz.UserV1().UpdateUser(c, &updateUserModel)
 	if err != nil {
 		log.Log.Error("更新用户失败", zap.Error(err))
@@ -185,11 +215,22 @@ func (u *userHandler) UserLogin(c *gin.Context) {
 		core.WriteResponse(c, errno.ErrInvalidParams, errmessages)
 		return
 	}
-	userLoginResponse, err := u.biz.UserV1().UserLogin(c, userLogin)
+	userinfo, err := u.biz.UserV1().UserLogin(c, userLogin)
 	if err != nil {
 		log.Log.Error("用户登录失败", zap.Error(err))
 		core.WriteResponse(c, err, nil)
 		return
+	}
+	// 生成token
+	tokenString, err := u.authStrategy.GenerateToken(userinfo.UserID, userinfo.Username)
+	if err != nil {
+		log.Log.Error("生成token失败", zap.Error(err))
+		core.WriteResponse(c, errno.ErrGenerateToken, nil)
+		return
+	}
+	userLoginResponse := &model.UserLoginResponse{
+		User:  *userinfo,
+		Token: tokenString,
 	}
 
 	core.WriteResponse(c, nil, userLoginResponse)
