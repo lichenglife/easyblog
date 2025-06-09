@@ -21,7 +21,7 @@ type biz struct {
 
 // PostV1 implements IBiz.
 func (b *biz) PostV1() postv1.PostBiz {
-	panic("unimplemented")
+	return   postv1.NewPostBiz(b.store.Post())
 }
 
 // UserV1 implements IBiz.

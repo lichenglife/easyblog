@@ -124,9 +124,9 @@ func (s *HTTPServer) registerRoutes() error {
 		// 博客服务接口
 		auth.POST("/posts", s.handler.Posts().CreatePost)                   // 创建帖子
 		auth.GET("/posts/:id", s.handler.Posts().GetPostByID)               // 根据 ID 获取帖子
-		auth.GET("/posts/list", s.handler.Posts().ListPosts)                // 获取帖子列表
-		auth.PUT("/posts/:id", s.handler.Posts().UpdatePost)                // 更新帖子
-		auth.DELETE("/posts/:id", s.handler.Posts().DeletePost)             // 删除帖子
+		auth.GET("/posts	", s.handler.Posts().ListPosts)                     // 获取帖子列表
+		auth.PUT("/posts/:postID", s.handler.Posts().UpdatePost)            // 更新帖子
+		auth.DELETE("/posts/:postID", s.handler.Posts().DeletePost)         // 删除帖子
 		auth.GET("/posts/user/:userID", s.handler.Posts().GetPostsByUserID) // 根据用户ID获取帖子列表
 	}
 

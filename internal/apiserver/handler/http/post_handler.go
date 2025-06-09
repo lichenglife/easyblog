@@ -3,6 +3,9 @@ package handler
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/lichenglife/easyblog/internal/apiserver/biz"
+	"github.com/lichenglife/easyblog/internal/apiserver/model"
+	"github.com/lichenglife/easyblog/internal/pkg/core"
+	"github.com/lichenglife/easyblog/internal/pkg/errno"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
 )
 
@@ -29,32 +32,105 @@ type postHandler struct {
 
 // createPost implements PostHandler.
 func (p *postHandler) CreatePost(c *gin.Context) {
-	panic("unimplemented")
+	// // 1、解析参数
+	var req model.CreatePostRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Log.Error(err.Error())
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	// 2、当前用户
+	userID := c.GetString("userID")
+	req.UserID = userID
+	//3、创建博客
+	post, err := p.postBiz.PostV1().CreatePost(c, &req)
+	if err != nil {
+		log.Log.Error(err.Error())
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, nil, post)
+
 }
 
 // deletePost implements PostHandler.
 func (p *postHandler) DeletePost(c *gin.Context) {
-	panic("unimplemented")
+	// 1、解析参数
+	postID := c.Param("postID")
+	// 2、删除博客
+	if err := p.postBiz.PostV1().DeletePostByPostID(c, postID); err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, nil, errno.OK)
+
 }
 
 // getPostByID implements PostHandler.
 func (p *postHandler) GetPostByID(c *gin.Context) {
-	panic("unimplemented")
+	// 1、解析参数
+	postID := c.Param("postID")
+	// 2、执行查询
+	post, err := p.postBiz.PostV1().GetPostByPostID(c, postID)
+	if err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, nil, post)
 }
 
 // getPostsByUserID implements PostHandler.
 func (p *postHandler) GetPostsByUserID(c *gin.Context) {
-	panic("unimplemented")
+	// 1、解析参数
+	userID := c.Param("userID")
+
+	pageSize := core.GetLimitParam(c)
+	page := core.GetPageParam(c)
+
+	// 2、执行查询
+	posts, err := p.postBiz.PostV1().GetPostsByUserID(c, userID, page, pageSize)
+	if err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+
+	core.WriteResponse(c, nil, posts)
+
 }
 
 // listPosts implements PostHandler.
 func (p *postHandler) ListPosts(c *gin.Context) {
-	panic("unimplemented")
+	// 1、解析参数
+
+	pageSize := core.GetLimitParam(c)
+	page := core.GetPageParam(c)
+
+	// 2、执行查询
+	posts, err := p.postBiz.PostV1().ListPosts(c, page, pageSize)
+	if err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+
+	core.WriteResponse(c, nil, posts)
 }
 
 // updatePost implements PostHandler.
 func (p *postHandler) UpdatePost(c *gin.Context) {
-	panic("unimplemented")
+	// 1、解析参数
+	postID := c.Param("postID")
+	var req *model.UpdatePostRequest
+	if err := c.ShouldBindBodyWithJSON(&req); err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	// 2、执行更新
+	req.PostID = postID
+	if err := p.postBiz.PostV1().UpdatePost(c, req); err != nil {
+		core.WriteResponse(c, err, nil)
+		return
+	}
+	core.WriteResponse(c, nil, "更新成功")
 }
 
 // NewPostHandler 创建PostHandler实例

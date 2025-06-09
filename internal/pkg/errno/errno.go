@@ -108,10 +108,11 @@ var (
 	ErrGenerateToken     = New(20008, "生成token失败", http.StatusUnauthorized)
 
 	// 博客相关错误码 (3xxxx)
-	ErrPostNotFound       = New(30001, "博客不存在", http.StatusNotFound)
-	ErrPostAccessDenied   = New(30002, "无权访问该博客", http.StatusForbidden)
-	ErrInvalidPostTitle   = New(30003, "博客标题格式不正确", http.StatusBadRequest)
-	ErrInvalidPostContent = New(30004, "博客内容格式不正确", http.StatusBadRequest)
+	ErrPostNotFound        = New(30001, "博客不存在", http.StatusNotFound)
+	ErrPostAccessDenied    = New(30002, "无权访问该博客", http.StatusForbidden)
+	ErrInvalidPostTitle    = New(30003, "博客标题格式不正确", http.StatusBadRequest)
+	ErrInvalidPostContent  = New(30004, "博客内容格式不正确", http.StatusBadRequest)
+	ErrPostNotBelongToUser = New(30005, "当前博客不属于当前用户", http.StatusForbidden)
 )
 
 // IsRecordNotFound 判断是否是记录不存在错误
