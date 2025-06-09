@@ -8,8 +8,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/lichenglife/easyblog/internal/pkg/token"
-
 	"github.com/lichenglife/easyblog/internal/app"
 	"github.com/lichenglife/easyblog/internal/server"
 	"github.com/spf13/viper"
@@ -53,8 +51,6 @@ func RunAppWithDefaultAppOptions(config *viper.Viper, appConfig *AppConfig) erro
 	if err != nil {
 		return fmt.Errorf("初始化应用失败:%v", err)
 	}
-	//  初始化token
-	token.Init(config.GetString("jwt.jwtkey"), config.GetString("jwt.identityKey"), config.GetDuration("jwt.expire"))
 	//  构建server
 	server, err := server.NewUnionServer(config, app)
 	if err != nil {
