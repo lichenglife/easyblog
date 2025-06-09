@@ -88,7 +88,8 @@ var (
 	// ErrInvalidToken 表示无效的Token
 	ErrInvalidToken = New(10008, "无效的Token", http.StatusUnauthorized)
 	// ErrTokenExpired 表示Token已过期
-	ErrTokenExpired = New(10009, "Token已过期", http.StatusUnauthorized)
+	ErrTokenExpired    = New(10009, "Token已过期", http.StatusUnauthorized)
+	ErrEncryptPassword = New(10010, "用户密码加密失败", http.StatusUnauthorized)
 
 	ErrBind    = New(100010, "参数错误", http.StatusBadGateway)
 	ErrUnknown = New(99999, "未知错误", http.StatusBadRequest)
@@ -104,12 +105,14 @@ var (
 	ErrInvalidPassword   = New(20005, "密码格式不正确", http.StatusBadRequest)
 	ErrInvalidPhone      = New(20006, "手机号格式不正确", http.StatusBadRequest)
 	ErrInvalidEmail      = New(20007, "邮箱格式不正确", http.StatusBadRequest)
+	ErrGenerateToken     = New(20008, "生成token失败", http.StatusUnauthorized)
 
 	// 博客相关错误码 (3xxxx)
-	ErrPostNotFound       = New(30001, "博客不存在", http.StatusNotFound)
-	ErrPostAccessDenied   = New(30002, "无权访问该博客", http.StatusForbidden)
-	ErrInvalidPostTitle   = New(30003, "博客标题格式不正确", http.StatusBadRequest)
-	ErrInvalidPostContent = New(30004, "博客内容格式不正确", http.StatusBadRequest)
+	ErrPostNotFound        = New(30001, "博客不存在", http.StatusNotFound)
+	ErrPostAccessDenied    = New(30002, "无权访问该博客", http.StatusForbidden)
+	ErrInvalidPostTitle    = New(30003, "博客标题格式不正确", http.StatusBadRequest)
+	ErrInvalidPostContent  = New(30004, "博客内容格式不正确", http.StatusBadRequest)
+	ErrPostNotBelongToUser = New(30005, "当前博客不属于当前用户", http.StatusForbidden)
 )
 
 // IsRecordNotFound 判断是否是记录不存在错误

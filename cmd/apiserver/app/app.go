@@ -44,13 +44,13 @@ func RunApp(config *viper.Viper) error {
 // RunAppWithDefaultAppOptions  启动App应用 启动server服务
 
 func RunAppWithDefaultAppOptions(config *viper.Viper, appConfig *AppConfig) error {
-
+	//  初始化参数校验器
+	//validation.InitValidator()
 	// 构建app
 	app, err := app.NewAppWithOptions(config, appConfig.AppOpts)
 	if err != nil {
 		return fmt.Errorf("初始化应用失败:%v", err)
 	}
-
 	//  构建server
 	server, err := server.NewUnionServer(config, app)
 	if err != nil {
