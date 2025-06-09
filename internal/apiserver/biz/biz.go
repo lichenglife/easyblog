@@ -1,58 +1,35 @@
 package biz
 
 import (
-	"context"
-
-	"github.com/lichenglife/easyblog/internal/apiserver/model"
+	postv1 "github.com/lichenglife/easyblog/internal/apiserver/biz/v1/post"
+	userv1 "github.com/lichenglife/easyblog/internal/apiserver/biz/v1/user"
 	"github.com/lichenglife/easyblog/internal/apiserver/store"
-	"github.com/lichenglife/easyblog/internal/pkg/log"
 )
 
-// UserBiz 用户业务接口
-type UserBiz interface {
-	// Create 创建用户
-	CreteUser(ctx context.Context, req *model.CreatePostRequest) (*model.UserInfo, error)
-	// GetByID 根据 ID 获取用户
-	GetUserByID(ctx context.Context, id uint) (*model.UserInfo, error)
-	// GetByUsername 根据用户名获取用户
-	GetUserByUsername(ctx context.Context, username string) (*model.UserInfo, error)
-	// Update 更新用户
-	UpdateUser(ctx context.Context, user *model.UpdateUser) error
-	// Delete 删除用户
-	DeleteUser(ctx context.Context, id uint) error
-	// List 获取用户列表
-	ListUsers(ctx context.Context, page, pageSize int) (*model.ListUserResponse, error)
+type IBiz interface {
+	// 用户业务接口V1版本
+	UserV1() userv1.UserBiz
+	// 博客业务接口V1版本
+	PostV1() postv1.PostBiz
 }
 
-type PostBiz interface {
-	// Create 创建帖子
-	CreatePost(ctx context.Context, req *model.CreatePostRequest) (*model.Post, error)
-	// GetByID 根据 ID 获取帖子
-	GetPostByID(ctx context.Context, id uint) (*model.Post, error)
-	// Update 更新帖子
-	UpdatePost(ctx context.Context, post *model.UpdatePostRequest) error
-	// Delete 删除帖子
-	DeletePost(ctx context.Context, id uint) error
-	// List 获取帖子列表
-	ListPosts(ctx context.Context, page, pageSize int) (*model.ListPostResponse, error)
-	// GetByUserID 根据用户 ID 获取帖子列表
-	GetPostsByUserID(ctx context.Context, userID string, page, pageSize int) (*model.ListPostResponse, error)
-	// GetByPostID 根据帖子 ID 获取帖子
-	GetPostByPostID(ctx context.Context, postID string) (*model.Post, error)
+// biz 实现 IBiz 接口
+type biz struct {
+	// 存储层的业务逻辑
+	store store.IStore
 }
 
-// NewPostBiz 实例化postBiz对象
-func NewPostBiz(logger *log.Logger, store store.PostStore) PostBiz {
-
-	return &postBiz{
-		logger: logger,
-		store:  store,
-	}
+// PostV1 implements IBiz.
+func (b *biz) PostV1() postv1.PostBiz {
+	return   postv1.NewPostBiz(b.store.Post())
 }
 
-func NewUserBiz(logger *log.Logger, store store.UserStore) UserBiz {
-	return &userBiz{
-		logger: logger,
-		store:  store,
-	}
+// UserV1 implements IBiz.
+func (b *biz) UserV1() userv1.UserBiz {
+	return userv1.NewUserBiz(b.store.User())
+}
+
+// NewBiz 创建业务逻辑层实例
+func NewBiz(store store.IStore) IBiz {
+	return &biz{store: store}
 }

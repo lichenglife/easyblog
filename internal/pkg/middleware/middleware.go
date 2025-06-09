@@ -105,11 +105,3 @@ func RateLimit() gin.HandlerFunc {
 		c.Next()
 	}
 }
-
-// Auth 认证中间件
-// func Auth() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		// TODO: 实现认证逻辑
-// 		c.Next()
-// 	}
-// }
