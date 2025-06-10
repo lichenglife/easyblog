@@ -30,7 +30,18 @@ type postHandler struct {
 	postBiz biz.IBiz
 }
 
-// createPost implements PostHandler.
+// CreatePost 创建帖子
+// @Summary 创建帖子
+// @Description 创建一个新的帖子
+// @Tags 帖子管理
+// @Accept json
+// @Produce json
+// @Security     Bearer
+// @Param body body model.CreatePostRequest true "创建帖子请求参数"
+// @Success 200 {object} core.Response{data=model.Post} "成功响应"
+// @Failure 400 {object} core.Response "请求参数错误"
+// @Failure 500 {object} core.Response "服务器内部错误"
+// @Router /posts [post]
 func (p *postHandler) CreatePost(c *gin.Context) {
 	// // 1、解析参数
 	var req model.CreatePostRequest
@@ -53,7 +64,15 @@ func (p *postHandler) CreatePost(c *gin.Context) {
 
 }
 
-// deletePost implements PostHandler.
+// DeletePost 删除帖子
+// @Summary 删除帖子
+// @Description 根据帖子 ID 删除帖子
+// @Tags 帖子管理
+// @Security     Bearer
+// @Param postID path string true "帖子 ID"
+// @Success 200 {object} core.Response "成功响应"
+// @Failure 500 {object} core.Response "服务器内部错误"
+// @Router /posts/{postID} [delete]
 func (p *postHandler) DeletePost(c *gin.Context) {
 	// 1、解析参数
 	postID := c.Param("postID")
@@ -66,7 +85,15 @@ func (p *postHandler) DeletePost(c *gin.Context) {
 
 }
 
-// getPostByID implements PostHandler.
+// GetPostByID 获取帖子信息
+// @Summary 获取帖子信息
+// @Description 根据帖子 ID 获取帖子信息
+// @Tags 帖子管理
+// @Security     Bearer
+// @Param postID path string true "帖子 ID"
+// @Success 200 {object} core.Response{data=model.Post} "成功响应"
+// @Failure 500 {object} core.Response "服务器内部错误"
+// @Router /posts/{postID} [get]
 func (p *postHandler) GetPostByID(c *gin.Context) {
 	// 1、解析参数
 	postID := c.Param("postID")
@@ -79,7 +106,17 @@ func (p *postHandler) GetPostByID(c *gin.Context) {
 	core.WriteResponse(c, nil, post)
 }
 
-// getPostsByUserID implements PostHandler.
+// GetPostsByUserID 获取用户的帖子列表
+// @Summary 获取用户的帖子列表
+// @Description 根据用户 ID 获取帖子列表
+// @Tags 帖子管理
+// @Security     Bearer
+// @Param userID path string true "用户 ID"
+// @Param page query int false "页码"
+// @Param limit query int false "每页数量"
+// @Success 200 {object} core.Response{data=[]model.Post} "成功响应"
+// @Failure 500 {object} core.Response "服务器内部错误"
+// @Router /posts/user/{userID} [get]
 func (p *postHandler) GetPostsByUserID(c *gin.Context) {
 	// 1、解析参数
 	userID := c.Param("userID")
@@ -98,7 +135,16 @@ func (p *postHandler) GetPostsByUserID(c *gin.Context) {
 
 }
 
-// listPosts implements PostHandler.
+// ListPosts 获取帖子列表
+// @Summary 获取帖子列表
+// @Description 分页获取帖子列表
+// @Tags 帖子管理
+// @Security     Bearer
+// @Param page query int false "页码"
+// @Param limit query int false "每页数量"
+// @Success 200 {object} core.Response{data=[]model.ListPostResponse} "成功响应"
+// @Failure 500 {object} core.Response "服务器内部错误"
+// @Router /posts [get]
 func (p *postHandler) ListPosts(c *gin.Context) {
 	// 1、解析参数
 
@@ -115,7 +161,16 @@ func (p *postHandler) ListPosts(c *gin.Context) {
 	core.WriteResponse(c, nil, posts)
 }
 
-// updatePost implements PostHandler.
+// UpdatePost 更新帖子
+// @Summary 更新帖子
+// @Description 根据帖子 ID 更新帖子
+// @Tags 帖子管理
+// @Security     Bearer
+// @Param postID path string true "帖子 ID"
+// @Param body body model.UpdatePostRequest true "更新帖子请求参数"
+// @Success 200 {object} core.Response "成功响应"
+// @Failure 500 {object} core.Response "服务器内部错误"
+// @Router /posts/{postID} [put]
 func (p *postHandler) UpdatePost(c *gin.Context) {
 	// 1、解析参数
 	postID := c.Param("postID")

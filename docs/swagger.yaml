@@ -1,0 +1,597 @@
+basePath: /v1
+definitions:
+  core.Response:
+    properties:
+      code:
+        description: 错误码
+        type: integer
+      data:
+        description: 响应数据
+      message:
+        description: 错误信息
+        type: string
+    type: object
+  model.ChangePasswordRequest:
+    properties:
+      newPassword:
+        maxLength: 30
+        minLength: 6
+        type: string
+      oldPassword:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - newPassword
+    - oldPassword
+    type: object
+  model.CreatePostRequest:
+    properties:
+      content:
+        type: string
+      title:
+        type: string
+      userID:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  model.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      nickname:
+        maxLength: 30
+        minLength: 2
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - nickname
+    - password
+    - phone
+    - username
+    type: object
+  model.ListPostResponse:
+    properties:
+      hasMore:
+        type: boolean
+      posts:
+        items:
+          $ref: '#/definitions/model.Post'
+        type: array
+      totalCount:
+        type: integer
+    type: object
+  model.Post:
+    properties:
+      content:
+        type: string
+      createAt:
+        type: string
+      id:
+        type: integer
+      postID:
+        type: string
+      title:
+        type: string
+      updateAt:
+        type: string
+      userID:
+        type: string
+    type: object
+  model.UpdatePostRequest:
+    properties:
+      content:
+        type: string
+      postID:
+        type: string
+      title:
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  model.UpdateUser:
+    properties:
+      email:
+        type: string
+      nickname:
+        maxLength: 30
+        minLength: 2
+        type: string
+      phone:
+        type: string
+      userID:
+        type: string
+    type: object
+  model.UserInfo:
+    properties:
+      blogTotal:
+        type: integer
+      createdAt:
+        type: string
+      email:
+        type: string
+      nickname:
+        type: string
+      phone:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: string
+      username:
+        type: string
+    type: object
+  model.UserLoginRequest:
+    properties:
+      password:
+        maxLength: 30
+        minLength: 6
+        type: string
+      username:
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  model.UserLoginResponse:
+    properties:
+      token:
+        type: string
+      user:
+        $ref: '#/definitions/model.UserInfo'
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: http://example.com/support
+  description: EasyBlog 是一个简单的博客系统 API 文档。
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://example.com/terms/
+  title: EasyBlog API
+  version: "1.0"
+paths:
+  /posts:
+    get:
+      description: 分页获取帖子列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            allOf:
+            - $ref: '#/definitions/core.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.ListPostResponse'
+                  type: array
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 获取帖子列表
+      tags:
+      - 帖子管理
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的帖子
+      parameters:
+      - description: 创建帖子请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            allOf:
+            - $ref: '#/definitions/core.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Post'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/core.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 创建帖子
+      tags:
+      - 帖子管理
+  /posts/{postID}:
+    delete:
+      description: 根据帖子 ID 删除帖子
+      parameters:
+      - description: 帖子 ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            $ref: '#/definitions/core.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 删除帖子
+      tags:
+      - 帖子管理
+    get:
+      description: 根据帖子 ID 获取帖子信息
+      parameters:
+      - description: 帖子 ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            allOf:
+            - $ref: '#/definitions/core.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.Post'
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 获取帖子信息
+      tags:
+      - 帖子管理
+    put:
+      description: 根据帖子 ID 更新帖子
+      parameters:
+      - description: 帖子 ID
+        in: path
+        name: postID
+        required: true
+        type: string
+      - description: 更新帖子请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdatePostRequest'
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            $ref: '#/definitions/core.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 更新帖子
+      tags:
+      - 帖子管理
+  /posts/user/{userID}:
+    get:
+      description: 根据用户 ID 获取帖子列表
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            allOf:
+            - $ref: '#/definitions/core.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.Post'
+                  type: array
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户的帖子列表
+      tags:
+      - 帖子管理
+  /users:
+    get:
+      description: 分页获取用户列表
+      parameters:
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页数量
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            allOf:
+            - $ref: '#/definitions/core.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/model.UserInfo'
+                  type: array
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户列表
+      tags:
+      - 用户管理
+    post:
+      consumes:
+      - application/json
+      description: 创建一个新的用户
+      parameters:
+      - description: 创建用户请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.CreateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            allOf:
+            - $ref: '#/definitions/core.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.UserInfo'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/core.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      summary: 创建用户
+      tags:
+      - 用户管理
+  /users/{id}:
+    get:
+      description: 根据用户 ID 获取用户信息
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            allOf:
+            - $ref: '#/definitions/core.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.UserInfo'
+              type: object
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 获取用户信息
+      tags:
+      - 用户管理
+  /users/{userID}:
+    delete:
+      description: 根据用户 ID 删除用户
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            $ref: '#/definitions/core.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/core.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      - Authorization: []
+      summary: 删除用户
+      tags:
+      - 用户管理
+    put:
+      description: 根据用户 ID 更新用户信息
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      - description: 更新用户请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UpdateUser'
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            $ref: '#/definitions/core.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/core.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 更新用户信息
+      tags:
+      - 用户管理
+  /users/login:
+    post:
+      consumes:
+      - application/json
+      description: 用户登录并获取 Token
+      parameters:
+      - description: 用户登录请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            allOf:
+            - $ref: '#/definitions/core.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/model.UserLoginResponse'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/core.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      summary: 用户登录
+      tags:
+      - 用户管理
+  /users/logout:
+    post:
+      description: 用户登出并清除 Token
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            $ref: '#/definitions/core.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 用户登出
+      tags:
+      - 用户管理
+  /users/password/{userID}:
+    put:
+      description: 根据用户 ID 重置密码
+      parameters:
+      - description: 用户 ID
+        in: path
+        name: userID
+        required: true
+        type: string
+      - description: 重置密码请求参数
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/model.ChangePasswordRequest'
+      responses:
+        "200":
+          description: 成功响应
+          schema:
+            $ref: '#/definitions/core.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/core.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/core.Response'
+      security:
+      - Bearer: []
+      summary: 重置密码
+      tags:
+      - 用户管理
+securityDefinitions:
+  Bearer:
+    description: Bearer token authentication
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

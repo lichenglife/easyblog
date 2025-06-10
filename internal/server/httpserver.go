@@ -7,11 +7,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	_ "github.com/lichenglife/easyblog/docs" // 生成swagger文档
 	handler "github.com/lichenglife/easyblog/internal/apiserver/handler/http"
 	"github.com/lichenglife/easyblog/internal/app"
 	"github.com/lichenglife/easyblog/internal/pkg/core"
 	"github.com/lichenglife/easyblog/internal/pkg/middleware"
 	"github.com/spf13/viper"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.uber.org/zap"
 )
 
@@ -100,7 +103,8 @@ func (s *HTTPServer) registerRoutes() error {
 	s.engine.GET("/healthcheck", s.healthcheck)
 
 	// swagger api接口文档
-	//s.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	url := ginSwagger.URL("/swagger/doc.json") // swagger json 文档的路径
+	s.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
 	// 中间件
 
@@ -113,17 +117,17 @@ func (s *HTTPServer) registerRoutes() error {
 
 	{
 		// 用户服务接口
-		auth.GET("/users/info", s.handler.Users().UserInfo)      // 获取用户信息
-		auth.POST("/users/logout", s.handler.Users().UserLogout) // 用户登出
-		auth.GET("/users", s.handler.Users().ListUsers)          // 获取用户列表
-		auth.GET("/users/:id", s.handler.Users().GetUserByID)    // 根据 ID 获取用户
-		auth.PUT("/users/:userID", s.handler.Users().UpdateUser) // 更新用户
-		auth.DELETE("/users/:id", s.handler.Users().DeleteUser)  // 删除用户
+		auth.GET("/users/info", s.handler.Users().UserInfo)         // 获取用户信息
+		auth.POST("/users/logout", s.handler.Users().UserLogout)    // 用户登出
+		auth.GET("/users", s.handler.Users().ListUsers)             // 获取用户列表
+		auth.GET("/users/:userID", s.handler.Users().GetUserByID)   // 根据 ID 获取用户
+		auth.PUT("/users/:userID", s.handler.Users().UpdateUser)    // 更新用户
+		auth.DELETE("/users/:userID", s.handler.Users().DeleteUser) // 删除用户
 		auth.PUT("/users/password/:userID", s.handler.Users().ResetPassword)
 
 		// 博客服务接口
 		auth.POST("/posts", s.handler.Posts().CreatePost)                   // 创建帖子
-		auth.GET("/posts/:id", s.handler.Posts().GetPostByID)               // 根据 ID 获取帖子
+		auth.GET("/posts/:postID", s.handler.Posts().GetPostByID)           // 根据 ID 获取帖子
 		auth.GET("/posts", s.handler.Posts().ListPosts)                     // 获取帖子列表
 		auth.PUT("/posts/:postID", s.handler.Posts().UpdatePost)            // 更新帖子
 		auth.DELETE("/posts/:postID", s.handler.Posts().DeletePost)         // 删除帖子

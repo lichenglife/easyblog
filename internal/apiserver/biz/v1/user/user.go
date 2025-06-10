@@ -26,7 +26,7 @@ type UserBiz interface {
 	// Update 更新用户
 	UpdateUser(ctx context.Context, user *model.UpdateUser) error
 	// Delete 删除用户
-	DeleteUser(ctx context.Context, username string) error
+	DeleteUser(ctx context.Context, userID string) error
 	// List 获取用户列表
 	ListUsers(ctx context.Context, page, pageSize int) (*model.ListUserResponse, error)
 	// UserLogin 用户登录
@@ -60,10 +60,15 @@ func (u *userBiz) ChangePassword(ctx context.Context, userID string, req model.C
 	if err := authn.Compare(user.Password, req.OldPassword); err != nil {
 		return errno.ErrPasswordIncorrect
 	}
+	password, err := authn.Encrypt(req.NewPassword)
+	if err  != nil {
+		return  err
+	}
+	
 	// 3、更新用户密码
 	updateUser := model.User{
 		UserID:   userID,
-		Password: req.NewPassword,
+		Password: password,
 	}
 	if err := u.store.User().Update(ctx, &updateUser); err != nil {
 		log.Log.Error(err.Error())

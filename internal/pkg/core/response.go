@@ -16,11 +16,11 @@ type Response struct {
 }
 
 // ListResponse 定义了列表类API的响应结构
-type ListResponse[T any] struct {
-	TotalCount int64 `json:"totalCount"` // 总记录数
-	HasMore    bool  `json:"hasMore"`    // 是否还有更多
-	Items      []T   `json:"items"`      // 数据项
-}
+// type ListResponse[T any] struct {
+// 	TotalCount int64 `json:"totalCount"` // 总记录数
+// 	HasMore    bool  `json:"hasMore"`    // 是否还有更多
+// 	Items      []T   `json:"items"`      // 数据项
+// }
 
 // WriteResponse 写入HTTP响应
 func WriteResponse(c *gin.Context, err error, data interface{}) {
@@ -45,13 +45,13 @@ func WriteResponse(c *gin.Context, err error, data interface{}) {
 }
 
 // WriteListResponse 写入列表类API的HTTP响应
-func WriteListResponse[T any](c *gin.Context, total int64, page, pageSize int, items []T) {
-	WriteResponse(c, nil, ListResponse[T]{
-		TotalCount: total,
-		HasMore:    total > int64(page*pageSize),
-		Items:      items,
-	})
-}
+// func WriteListResponse[T any](c *gin.Context, total int64, page, pageSize int, items []T) {
+// 	WriteResponse(c, nil, ListResponse[T]{
+// 		TotalCount: total,
+// 		HasMore:    total > int64(page*pageSize),
+// 		Items:      items,
+// 	})
+// }
 
 // TODO 提取到utils中
 // GetPageParam 获取分页参数
