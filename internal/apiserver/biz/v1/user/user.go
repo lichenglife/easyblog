@@ -34,7 +34,7 @@ type UserBiz interface {
 	ChangePassword(ctx context.Context, userID string, user model.ChangePasswordRequest) error
 }
 
-func NewUserBiz(store store.UserStore) UserBiz {
+func NewUserBiz(store store.IStore) UserBiz {
 	return &userBiz{
 		store: store,
 	}
@@ -44,13 +44,13 @@ var _ UserBiz = (*userBiz)(nil)
 
 // userBiz 定义了用户业务逻辑层
 type userBiz struct {
-	store store.UserStore
+	store store.IStore
 }
 
 // ChangePassword implements UserBiz.
 func (u *userBiz) ChangePassword(ctx context.Context, userID string, req model.ChangePasswordRequest) error {
 	// 1、查询用户
-	user, err := u.store.GetByID(ctx, userID)
+	user, err := u.store.User().GetByID(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -63,7 +63,7 @@ func (u *userBiz) ChangePassword(ctx context.Context, userID string, req model.C
 		UserID:   userID,
 		Password: req.NewPassword,
 	}
-	if err := u.store.Update(ctx, &updateUser); err != nil {
+	if err := u.store.User().Update(ctx, &updateUser); err != nil {
 		log.Log.Error(err.Error())
 		return err
 	}
@@ -74,7 +74,7 @@ func (u *userBiz) ChangePassword(ctx context.Context, userID string, req model.C
 // UserLogin implements UserBiz.
 func (u *userBiz) UserLogin(ctx context.Context, req model.UserLoginRequest) (*model.UserInfo, error) {
 	// 1. 根据用户名查询用户是否存在
-	user, err := u.store.GetByUsername(ctx, req.Username)
+	user, err := u.store.User().GetByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, errno.ErrDatabase // 数据库查询错误
 	}
@@ -106,7 +106,7 @@ func (u *userBiz) UserLogin(ctx context.Context, req model.UserLoginRequest) (*m
 func (u *userBiz) CreateUser(ctx context.Context, req *model.CreateUserRequest) (*model.UserInfo, error) {
 
 	// 判断用户名是否已存在
-	existingUser, err := u.store.GetByUsername(ctx, req.Username)
+	existingUser, err := u.store.User().GetByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (u *userBiz) CreateUser(ctx context.Context, req *model.CreateUserRequest) 
 	}
 	user.Password = password
 	// 保存用户到数据库
-	if err := u.store.Create(ctx, user); err != nil {
+	if err := u.store.User().Create(ctx, user); err != nil {
 		return nil, err
 	}
 	userInfo := &model.UserInfo{
@@ -149,11 +149,11 @@ func (u *userBiz) CreateUser(ctx context.Context, req *model.CreateUserRequest) 
 // DeleteUser implements UserBiz.
 func (u *userBiz) DeleteUser(ctx context.Context, userID string) error {
 	//  判断用户是否存在
-	_, err := u.store.GetByID(ctx, userID)
+	_, err := u.store.User().GetByID(ctx, userID)
 	if err != nil {
 		return err
 	}
-	err = u.store.Delete(ctx, userID)
+	err = u.store.User().Delete(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (u *userBiz) DeleteUser(ctx context.Context, userID string) error {
 
 // GetUserByID implements UserBiz.
 func (u *userBiz) GetUserByID(ctx context.Context, userID string) (*model.UserInfo, error) {
-	user, err := u.store.GetByID(ctx, userID)
+	user, err := u.store.User().GetByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +179,7 @@ func (u *userBiz) GetUserByID(ctx context.Context, userID string) (*model.UserIn
 
 // GetUserByUsername implements UserBiz.
 func (u *userBiz) GetUserByUsername(ctx context.Context, username string) (*model.UserInfo, error) {
-	user, err := u.store.GetByUsername(ctx, username)
+	user, err := u.store.User().GetByUsername(ctx, username)
 	if err != nil {
 		return nil, err
 	}
@@ -197,7 +197,7 @@ func (u *userBiz) GetUserByUsername(ctx context.Context, username string) (*mode
 
 // ListUsers implements UserBiz.
 func (u *userBiz) ListUsers(ctx context.Context, page int, pageSize int) (*model.ListUserResponse, error) {
-	userList, totalCount, err := u.store.List(ctx, page, pageSize)
+	userList, totalCount, err := u.store.User().List(ctx, page, pageSize)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +225,7 @@ func (u *userBiz) ListUsers(ctx context.Context, page int, pageSize int) (*model
 func (u *userBiz) UpdateUser(ctx context.Context, updateUser *model.UpdateUser) error {
 	// 判断当前用户是否存在
 
-	userexist, err := u.store.GetByID(ctx, updateUser.UserID)
+	userexist, err := u.store.User().GetByID(ctx, updateUser.UserID)
 	if err != nil {
 		return errno.ErrNotFound
 	}
@@ -243,7 +243,7 @@ func (u *userBiz) UpdateUser(ctx context.Context, updateUser *model.UpdateUser) 
 		user.NickName = updateUser.Nickname
 	}
 
-	err = u.store.Update(ctx, user)
+	err = u.store.User().Update(ctx, user)
 	if err != nil {
 		return err
 	}
