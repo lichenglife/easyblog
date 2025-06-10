@@ -11,6 +11,8 @@ import (
 	"github.com/lichenglife/easyblog/internal/pkg/log"
 	"github.com/lichenglife/easyblog/internal/pkg/utils/authn"
 	genid "github.com/lichenglife/easyblog/internal/pkg/utils/genID"
+	"go.uber.org/zap"
+	"golang.org/x/sync/errgroup"
 )
 
 // UserBiz 用户业务接口
@@ -183,14 +185,18 @@ func (u *userBiz) GetUserByUsername(ctx context.Context, username string) (*mode
 	if err != nil {
 		return nil, err
 	}
-
+	count, _, err := u.store.Post().GetByUserID(ctx, user.UserID, 1, 10)
+	if err != nil {
+		return nil, err
+	}
 	//  TODO 查询blog信息,查询当前用户的blog信息
 	userinfo := &model.UserInfo{
-		UserID:   user.UserID,
-		Username: user.Username,
-		Email:    user.Email,
-		Phone:    user.Phone,
-		Nickname: user.NickName,
+		UserID:    user.UserID,
+		Username:  user.Username,
+		Email:     user.Email,
+		Phone:     user.Phone,
+		Nickname:  user.NickName,
+		BlogTotal: count,
 	}
 	return userinfo, nil
 }
@@ -202,16 +208,43 @@ func (u *userBiz) ListUsers(ctx context.Context, page int, pageSize int) (*model
 		return nil, err
 	}
 	userInfoList := make([]model.UserInfo, 0, len(userList))
-	// TODO 并发执行每个用户的博客信息
+	// 查询每个用户的博客数量
+	// 遍历userlist 查询每个用户的博客数量
+	eg, ctx := errgroup.WithContext(ctx)
+	// 设置最大并发数
+	eg.SetLimit(10)
+	var count int64
 	for _, user := range userList {
-		userInfoList = append(userInfoList, model.UserInfo{
-			UserID:   user.UserID,
-			Username: user.Username,
-			Email:    user.Email,
-			Phone:    user.Phone,
-			Nickname: user.NickName,
+
+		eg.Go(func() error {
+			select {
+			case <-ctx.Done():
+				return nil
+			default:
+			}
+
+			count, _, err = u.store.Post().GetByUserID(ctx, user.UserID, 1, 10)
+			if err != nil {
+				return err
+			}
+			log.Log.Error("查询用户博客失败", zap.Error(err))
+			userInfoList = append(userInfoList, model.UserInfo{
+				UserID:    user.UserID,
+				Username:  user.Username,
+				Email:     user.Email,
+				Phone:     user.Phone,
+				Nickname:  user.NickName,
+				BlogTotal: count,
+			})
+			return nil
 		})
+
 	}
+	if err := eg.Wait(); err != nil {
+		log.Log.Error(err.Error())
+		return nil, err
+	}
+
 	userListResponse := &model.ListUserResponse{
 		TotalCount: totalCount, // TODO 从数据库中获取
 		User:       userInfoList,

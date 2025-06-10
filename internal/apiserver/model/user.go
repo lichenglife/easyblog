@@ -44,7 +44,7 @@ type UserInfo struct {
 	Phone     string    `json:"phone"`
 	CreatedAt time.Time `json:"createdAt"`
 	UpdatedAt time.Time `json:"updatedAt"`
-	BlogTotal int       `json:"blogTotal"`
+	BlogTotal int64       `json:"blogTotal"`
 }
 
 //  用户登录请求结构
