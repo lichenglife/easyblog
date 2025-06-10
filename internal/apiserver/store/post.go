@@ -91,9 +91,9 @@ func (p *posts) GetByUserID(ctx context.Context, userID string, page, pageSize i
 
 // GetByPostID 根据帖子 ID 获取帖子
 func (p *posts) GetByPostID(ctx context.Context, postID string) (*model.Post, error) {
-	var post *model.Post
-	if err := p.db.WithContext(ctx).Model(&model.Post{}).Where("postID = ?", postID).Find(&post).Error; err != nil {
+	var post model.Post
+	if err := p.db.WithContext(ctx).Where("postID = ?", postID).First(&post).Error; err != nil {
 		return nil, err
 	}
-	return post, nil
+	return &post, nil
 }

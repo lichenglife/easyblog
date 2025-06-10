@@ -146,7 +146,7 @@ func (app *App) initStoreFactory() error {
 // init初始化认证服务
 func (app *App) initAuthStrategy() error {
 	userStore := app.GetStoreFactory()
-	userbiz := biz.NewUserBiz(userStore.User())
+	userbiz := biz.NewUserBiz(userStore)
 	app.authStrategy = middleware.NewJWTStrategy(userbiz)
 	return nil
 }
