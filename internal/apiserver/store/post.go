@@ -41,13 +41,13 @@ func (p *posts) Create(ctx context.Context, post *model.Post) error {
 
 // GetByID 根据 ID 获取帖子
 func (p *posts) GetByID(ctx context.Context, id uint) (*model.Post, error) {
-	var post *model.Post
-	err := p.db.WithContext(ctx).Model(&model.Post{}).Where("id = ?", id).Find(post).Error
+	var post model.Post
+	err := p.db.WithContext(ctx).Where("id = ?", id).First(&post).Error
 	if err != nil {
 		return nil, err
 	}
 
-	return post, nil
+	return &post, nil
 }
 
 // Update 更新帖子

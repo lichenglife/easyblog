@@ -12,7 +12,8 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-var Log *Logger
+// 初始化、避免代码panic
+var Log *Logger = &Logger{zap.NewNop()}
 
 // Logger 表示日志实例
 type Logger struct {
