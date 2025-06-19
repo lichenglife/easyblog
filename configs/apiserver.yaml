@@ -78,3 +78,21 @@ cors:
     - Authorization
   allowCredentials: true
   maxAge: 86400
+
+  # 监控配置
+monitor:
+  # pprof配置
+  pprof:
+    enable: true
+  # trace配置
+  trace:
+    enable: true
+    # Jaeger配置
+    jaeger:
+      endpoint: "http://localhost:14268/api/traces"
+  # metrics配置
+  metrics:
+    enable: true
+    # Prometheus配置
+    prometheus:
+      path: "/metrics" 
