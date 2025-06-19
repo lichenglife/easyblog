@@ -2,7 +2,6 @@ package store
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 	"testing"
 	"time"
@@ -14,36 +13,33 @@ import (
 	"gorm.io/gorm"
 )
 
-var (
-	db   *gorm.DB
-	mock sqlmock.Sqlmock
-)
+func setupPostMockDB(t *testing.T) (*gorm.DB, sqlmock.Sqlmock, func()) {
 
-func TestMain(m *testing.M) {
-	// 1、创建一个mock数据库
-	mockDB, sqlmock, err := sqlmock.New()
+	// mock数据库连接db 、用于管理返回SQL执行结构的mock
+	// New creates sqlmock database connection and a mock to manage expectations.
+	db, mock, err := sqlmock.New()
 	if err != nil {
-		panic(fmt.Errorf("failed to open sqlmock database: %v", err))
+		t.Fatalf("failed to open sqlmock database: %v", err)
 	}
-	mock = sqlmock
-	// 2、创建一个gorm数据库
+	// 初始化gorm
 	gdb, err := gorm.Open(mysql.New(mysql.Config{
-		Conn:                      mockDB,
+		Conn:                      db,
 		SkipInitializeWithVersion: true,
 	}), &gorm.Config{})
 	if err != nil {
-		panic(fmt.Errorf("failed to open gorm db: %v", err))
+		t.Fatalf("failed to open gorm %v", err)
 	}
-	// 3、创建一个清理函数
-	db = gdb
-	defer mockDB.Close()
-	//cleanup := func() { db.Close() }
-	//return gdb, mock, cleanup
-}
 
+	// 关闭数据库资源
+	cleanUp := func() {
+		defer db.Close()
+	}
+	return gdb, mock, cleanUp
+
+}
 func TestPosts_Create(t *testing.T) {
-	// db, mock, cleanup := setupMockDB(t)
-	// defer cleanup()
+	db, mock, cleanup := setupPostMockDB(t)
+	defer cleanup()
 	store := NewPosts(db)
 
 	post := &model.Post{PostID: "p1", UserID: "u1", Title: "test", Content: "content", CreatedAt: time.Now(), UpdatedAt: time.Now()}
@@ -57,7 +53,8 @@ func TestPosts_Create(t *testing.T) {
 }
 
 func TestPosts_GetByID(t *testing.T) {
-
+	db, mock, cleanup := setupPostMockDB(t)
+	defer cleanup()
 	store := NewPosts(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `post` WHERE id = ? ORDER BY `post`.`id` LIMIT ?")).WithArgs(1, 1).WillReturnRows(sqlmock.NewRows([]string{"id", "postID", "userID", "title", "content", "created_at", "updated_at"}).AddRow(1, "p1", "u1", "test", "content", time.Now(), time.Now()))
@@ -69,7 +66,8 @@ func TestPosts_GetByID(t *testing.T) {
 }
 
 func TestPosts_Update(t *testing.T) {
-
+	db, mock, cleanup := setupPostMockDB(t)
+	defer cleanup()
 	store := NewPosts(db)
 
 	post := &model.Post{PostID: "p1", UserID: "u1", Title: "test", Content: "content"}
@@ -83,7 +81,8 @@ func TestPosts_Update(t *testing.T) {
 }
 
 func TestPosts_Delete(t *testing.T) {
-
+	db, mock, cleanup := setupPostMockDB(t)
+	defer cleanup()
 	store := NewPosts(db)
 
 	mock.ExpectBegin()
@@ -96,7 +95,8 @@ func TestPosts_Delete(t *testing.T) {
 }
 
 func TestPosts_List(t *testing.T) {
-
+	db, mock, cleanup := setupPostMockDB(t)
+	defer cleanup()
 	store := NewPosts(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `post`")).
@@ -114,7 +114,8 @@ func TestPosts_List(t *testing.T) {
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 func TestPosts_GetByUserID(t *testing.T) {
-
+	db, mock, cleanup := setupPostMockDB(t)
+	defer cleanup()
 	store := NewPosts(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `post` WHERE userID = ?")).
@@ -135,7 +136,8 @@ func TestPosts_GetByUserID(t *testing.T) {
 }
 
 func TestPosts_GetByPostID(t *testing.T) {
-
+	db, mock, cleanup := setupPostMockDB(t)
+	defer cleanup()
 	store := NewPosts(db)
 
 	mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `post` WHERE postID = ? ORDER BY `post`.`id` LIMIT ?")).WithArgs("p1", 1).WillReturnRows(sqlmock.NewRows([]string{"id", "postID", "userID", "title", "content", "created_at", "updated_at"}).AddRow(1, "p1", "u1", "test", "content", time.Now(), time.Now()))

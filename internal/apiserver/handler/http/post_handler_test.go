@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"errors"
 
 	"net/http"
 	"net/http/httptest"
@@ -16,6 +15,7 @@ import (
 	postv1 "github.com/lichenglife/easyblog/internal/apiserver/biz/v1/post"
 	userv1 "github.com/lichenglife/easyblog/internal/apiserver/biz/v1/user"
 	"github.com/lichenglife/easyblog/internal/apiserver/model"
+	"github.com/lichenglife/easyblog/internal/pkg/errno"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -68,13 +68,14 @@ func (m *MockPostBiz) UpdatePost(ctx context.Context, req *model.UpdatePostReque
 type MockBiz struct {
 	mock.Mock
 	PostBiz postv1.PostBiz
+	UserBiz userv1.UserBiz
 }
 
 func (m *MockBiz) PostV1() postv1.PostBiz {
 	return m.PostBiz
 }
 
-func (m *MockBiz) UserV1() userv1.UserBiz { return nil }
+func (m *MockBiz) UserV1() userv1.UserBiz { return m.UserBiz }
 
 // postHandlerTest构建测试结构体
 type postHandlerTest struct {
@@ -136,18 +137,24 @@ func TestPostHandler_CreatePost_Fail(t *testing.T) {
 	mockBiz := &MockBiz{PostBiz: mockPostBiz}
 	h := NewPostHandler(nil, mockBiz)
 
+	req := &model.CreatePostRequest{
+		Content: "测试",
+		Title:   "测试",
+	}
+	bodyBytes, _ := json.Marshal(req)
+
 	r := setupGin()
 	r.POST("/posts", h.CreatePost)
 
 	w := httptest.NewRecorder()
 	c, _ := gin.CreateTestContext(w)
-	c.Request, _ = http.NewRequest("POST", "/posts", nil)
+	c.Request, _ = http.NewRequest("POST", "/posts", strings.NewReader(string(bodyBytes)))
 	c.Set("userID", "u1")
 
-	mockPostBiz.On("CreatePost", mock.Anything, mock.AnythingOfType("*model.CreatePostRequest")).Return(nil, errors.New("fail")).Once()
+	mockPostBiz.On("CreatePost", mock.Anything, mock.AnythingOfType("*model.CreatePostRequest")).Return(nil, errno.ErrInternalServer).Once()
 
 	h.CreatePost(c)
-	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
 	mockPostBiz.AssertExpectations(t)
 }
 
@@ -215,4 +222,127 @@ func TestPostHandler_CreatePost_ContextOnly(t *testing.T) {
 	postHandlerTest.mockPostBiz.AssertExpectations(t)
 }
 
-// 其它接口（DeletePost, GetPostByID, ListPosts, UpdatePost, GetPostsByUserID）可仿照上面写法补充
+// DeletePost 全流程测试
+func TestPostHandler_DeletePost_FullFlow(t *testing.T) {
+	mockPostBiz := new(MockPostBiz)
+	mockBiz := &MockBiz{PostBiz: mockPostBiz}
+	h := NewPostHandler(nil, mockBiz)
+
+	r := gin.New()
+	r.DELETE("/posts/:postID", h.DeletePost)
+
+	postID := "p1"
+	mockPostBiz.On("DeletePostByPostID", mock.Anything, postID).Return(nil).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("DELETE", "/posts/"+postID, nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	mockPostBiz.AssertExpectations(t)
+}
+
+// GetPostByID 全流程测试
+func TestPostHandler_GetPostByID_FullFlow(t *testing.T) {
+	mockPostBiz := new(MockPostBiz)
+	mockBiz := &MockBiz{PostBiz: mockPostBiz}
+	h := NewPostHandler(nil, mockBiz)
+
+	r := gin.New()
+	r.GET("/posts/:postID", h.GetPostByID)
+
+	postID := "p1"
+	post := &model.Post{PostID: postID, UserID: "u1", Title: "test", Content: "test content"}
+	mockPostBiz.On("GetPostByPostID", mock.Anything, postID).Return(post, nil).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/posts/"+postID, nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	mockPostBiz.AssertExpectations(t)
+}
+
+// ListPosts 全流程测试
+func TestPostHandler_ListPosts_FullFlow(t *testing.T) {
+	mockPostBiz := new(MockPostBiz)
+	mockBiz := &MockBiz{PostBiz: mockPostBiz}
+	h := NewPostHandler(nil, mockBiz)
+
+	r := gin.New()
+	r.GET("/posts", h.ListPosts)
+
+	listResp := &model.ListPostResponse{
+		TotalCount: 1,
+		Posts: []*model.Post{
+			{PostID: "p1", UserID: "u1", Title: "test", Content: "test content"},
+		},
+		HasMore: false,
+	}
+	mockPostBiz.On("ListPosts", mock.Anything, mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(listResp, nil).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/posts?page=1&pageSize=10", nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	mockPostBiz.AssertExpectations(t)
+}
+
+// UpdatePost 全流程测试
+func TestPostHandler_UpdatePost_FullFlow(t *testing.T) {
+	mockPostBiz := new(MockPostBiz)
+	mockBiz := &MockBiz{PostBiz: mockPostBiz}
+	h := NewPostHandler(nil, mockBiz)
+
+	r := gin.New()
+	r.PUT("/posts/:postID", h.UpdatePost)
+
+	postID := "p1"
+	updateReq := &model.UpdatePostRequest{
+		PostID:  postID,
+		Title:   "updated title",
+		Content: "updated content",
+	}
+	bodyBytes, _ := json.Marshal(updateReq)
+	mockPostBiz.On("UpdatePost", mock.Anything, mock.AnythingOfType("*model.UpdatePostRequest")).Return(nil).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("PUT", "/posts/"+postID, strings.NewReader(string(bodyBytes)))
+	req.Header.Set("Content-Type", "application/json")
+
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	mockPostBiz.AssertExpectations(t)
+}
+
+// GetPostsByUserID 全流程测试
+func TestPostHandler_GetPostsByUserID_FullFlow(t *testing.T) {
+	mockPostBiz := new(MockPostBiz)
+	mockBiz := &MockBiz{PostBiz: mockPostBiz}
+	h := NewPostHandler(nil, mockBiz)
+
+	r := gin.New()
+	r.GET("/users/:userID/posts", h.GetPostsByUserID)
+
+	userID := "u1"
+	listResp := &model.ListPostResponse{
+		TotalCount: 1,
+		Posts: []*model.Post{
+			{PostID: "p1", UserID: userID, Title: "test", Content: "test content"},
+		},
+		HasMore: false,
+	}
+	mockPostBiz.On("GetPostsByUserID", mock.Anything, userID, mock.AnythingOfType("int"), mock.AnythingOfType("int")).Return(listResp, nil).Once()
+
+	w := httptest.NewRecorder()
+	req := httptest.NewRequest("GET", "/users/"+userID+"/posts?page=1&pageSize=10", nil)
+	req.Header.Set("Content-Type", "application/json")
+
+	r.ServeHTTP(w, req)
+	assert.Equal(t, http.StatusOK, w.Code)
+	mockPostBiz.AssertExpectations(t)
+}
