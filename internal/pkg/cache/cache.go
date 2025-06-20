@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/viper"
 )
 
+var redisClient = redis.NewClient
+
 type Cache struct {
 	*redis.Client
 }
@@ -16,8 +18,8 @@ type Cache struct {
 // NewCache创建一个Redis客户端实例
 func NewCache(config *viper.Viper) (*Cache, error) {
 	// 创建redis  client 客户端实例
-	client := redis.NewClient(&redis.Options{
-		Addr:         fmt.Sprintf("%s:%d", config.GetString("redis.add"), config.GetInt("redis.port")),
+	client := redisClient(&redis.Options{
+		Addr:         fmt.Sprintf("%s:%d", config.GetString("redis.host"), config.GetInt("redis.port")),
 		Password:     config.GetString("redis.password"),
 		DB:           config.GetInt("redis.db"),
 		PoolSize:     config.GetInt("redis.poolSize"),
@@ -28,7 +30,7 @@ func NewCache(config *viper.Viper) (*Cache, error) {
 	// 创建带有超时机制的context
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	if err := client.Ping(ctx); err != nil {
+	if err := client.Ping(ctx).Err(); err != nil {
 
 		return nil, fmt.Errorf("连接Redis失败 %v", err)
 	}
