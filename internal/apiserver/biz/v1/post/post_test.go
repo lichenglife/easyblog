@@ -115,6 +115,8 @@ func TestPostBiz_DeletePostByPostID(t *testing.T) {
 	mockStore := &MockStore{PostStore: mockPostStore}
 	biz := NewPostBiz(mockStore)
 
+	// 为兼容 Gin context 取值，需用 string 类型 key，静态检查 SA1029 可忽略。
+	//nolint:staticcheck // SA1029: string key for context is required for Gin compatibility
 	ctx := context.WithValue(context.Background(), "userID", "u1")
 	post := &model.Post{PostID: "p1", UserID: "u1"}
 	mockPostStore.On("GetByPostID", mock.Anything, "p1").Return(post, nil).Once()
@@ -131,6 +133,8 @@ func TestPostBiz_DeletePostByPostID_NotFound(t *testing.T) {
 	mockStore := &MockStore{PostStore: mockPostStore}
 	biz := NewPostBiz(mockStore)
 
+	// 为兼容 Gin context 取值，需用 string 类型 key，静态检查 SA1029 可忽略。
+	//nolint:staticcheck // SA1029: string key for context is required for Gin compatibility
 	ctx := context.WithValue(context.Background(), "userID", "u1")
 	mockPostStore.On("GetByPostID", mock.Anything, "p1").Return(nil, errors.New("not found")).Once()
 
@@ -145,6 +149,8 @@ func TestPostBiz_DeletePostByPostID_NotBelongToUser(t *testing.T) {
 	mockStore := &MockStore{PostStore: mockPostStore}
 	biz := NewPostBiz(mockStore)
 
+	// 为兼容 Gin context 取值，需用 string 类型 key，静态检查 SA1029 可忽略。
+	//nolint:staticcheck // SA1029: string key for context is required for Gin compatibility
 	ctx := context.WithValue(context.Background(), "userID", "u1")
 	post := &model.Post{PostID: "p1", UserID: "u2"}
 	mockPostStore.On("GetByPostID", mock.Anything, "p1").Return(post, nil).Once()

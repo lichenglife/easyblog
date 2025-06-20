@@ -328,13 +328,15 @@ func Test_UserLogin(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	// 9、解析响应体
 	var resp CommonResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	assert.NoError(t, err)
 	// 将interface{} 序列化为 json字节
 	dataBytes, _ := json.Marshal(resp.Data)
 
 	var loginResp model.UserLoginResponse
 	// 反序列化json字节为目标结构体
-	json.Unmarshal(dataBytes, &loginResp)
+	err = json.Unmarshal(dataBytes, &loginResp)
+	assert.NoError(t, err)
 	// 10、断言
 	assert.Equal(t, "zhangsan", loginResp.User.Username)
 	assert.Equal(t, "zhangsang", loginResp.User.Nickname)
@@ -390,11 +392,13 @@ func Test_ListUsers(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	// 9、解析响应体
 	var resp CommonResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	assert.NoError(t, err)
 
 	dataBytes, _ := json.Marshal(resp.Data)
 	var listResp model.ListUserResponse
-	json.Unmarshal(dataBytes, &listResp)
+	err = json.Unmarshal(dataBytes, &listResp)
+	assert.NoError(t, err)
 	// 10、断言
 	assert.Equal(t, resp.Code, 0)
 	assert.Equal(t, resp.Message, "OK")
@@ -514,7 +518,8 @@ func Test_DeleteUser_Full_Process(t *testing.T) {
 	// 6、断言
 	assert.Equal(t, http.StatusOK, w.Code)
 	var resp CommonResponse
-	json.Unmarshal(w.Body.Bytes(), &resp)
+	err := json.Unmarshal(w.Body.Bytes(), &resp)
+	assert.NoError(t, err)
 	assert.Equal(t, resp.Code, 0)
 	assert.Equal(t, resp.Message, "OK")
 }

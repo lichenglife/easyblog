@@ -2,7 +2,7 @@ package biz
 
 import (
 	"context"
-
+	"sync"
 	"time"
 
 	"github.com/lichenglife/easyblog/internal/apiserver/model"
@@ -16,6 +16,8 @@ import (
 )
 
 // UserBiz 用户业务接口
+//
+//go:generate mockgen -source=internal/apiserver/biz/v1/user/user.go -destination=internal/apiserver/biz/v1/user/mocks/mock_userbiz.go -package=mock//go:generate mockgen -source=D:/workspace/GoWorks/github.com/lichenglife/easyblog/internal/apiserver/biz/v1/user/user.go -destination=D:/workspace/GoWorks/github.com/lichenglife/easyblog/internal/apiserver/biz/v1/user/mocks/mock_userbiz.go -package=mocks
 type UserBiz interface {
 	// Create 创建用户
 	CreateUser(ctx context.Context, req *model.CreateUserRequest) (*model.UserInfo, error)
@@ -61,10 +63,10 @@ func (u *userBiz) ChangePassword(ctx context.Context, userID string, req model.C
 		return errno.ErrPasswordIncorrect
 	}
 	password, err := authn.Encrypt(req.NewPassword)
-	if err  != nil {
-		return  err
+	if err != nil {
+		return err
 	}
-	
+
 	// 3、更新用户密码
 	updateUser := model.User{
 		UserID:   userID,
@@ -212,46 +214,55 @@ func (u *userBiz) ListUsers(ctx context.Context, page int, pageSize int) (*model
 	if err != nil {
 		return nil, err
 	}
-	userInfoList := make([]model.UserInfo, 0, len(userList))
-	// 查询每个用户的博客数量
-	// 遍历userlist 查询每个用户的博客数量
+
+	// 创建一个固定大小的切片，用于存储用户信息
+	userInfoList := make([]model.UserInfo, len(userList))
+	// 创建一个互斥锁，用于保护对 userInfoList 的访问
+	var mu sync.Mutex
+	// 创建一个 errgroup，用于并发处理
 	eg, ctx := errgroup.WithContext(ctx)
 	// 设置最大并发数
 	eg.SetLimit(10)
-	var count int64
-	for _, user := range userList {
 
+	// 为每个用户创建一个 goroutine 来获取博客数量
+	for i, user := range userList {
+		i, user := i, user // 创建副本以避免闭包问题
 		eg.Go(func() error {
 			select {
 			case <-ctx.Done():
-				return nil
+				return ctx.Err()
 			default:
 			}
 
-			count, _, err = u.store.Post().GetByUserID(ctx, user.UserID, 1, 10)
+			count, _, err := u.store.Post().GetByUserID(ctx, user.UserID, 1, 10)
 			if err != nil {
+				log.Log.Error("查询用户博客失败", zap.Error(err))
 				return err
 			}
-			log.Log.Error("查询用户博客失败", zap.Error(err))
-			userInfoList = append(userInfoList, model.UserInfo{
+			// 使用互斥锁保护对 userInfoList 的访问
+			mu.Lock()
+			userInfoList[i] = model.UserInfo{
 				UserID:    user.UserID,
 				Username:  user.Username,
 				Email:     user.Email,
 				Phone:     user.Phone,
 				Nickname:  user.NickName,
 				BlogTotal: count,
-			})
+				CreatedAt: user.CreatedAt,
+				UpdatedAt: user.UpdatedAt,
+			}
+			mu.Unlock()
 			return nil
 		})
-
 	}
+
+	// 等待所有 goroutine 完成
 	if err := eg.Wait(); err != nil {
-		log.Log.Error(err.Error())
 		return nil, err
 	}
 
 	userListResponse := &model.ListUserResponse{
-		TotalCount: totalCount, // TODO 从数据库中获取
+		TotalCount: totalCount,
 		User:       userInfoList,
 		HasMore:    totalCount > int64(page*pageSize), // 假设每页10条记录，判断是否还有更多记录,
 	}

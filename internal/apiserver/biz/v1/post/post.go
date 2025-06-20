@@ -75,7 +75,13 @@ func (p *postBiz) DeletePostByPostID(ctx context.Context, postID string) error {
 		return errno.ErrNotFound
 	}
 	// 校验是否与当前用户一致
-	userID := ctx.Value("userID").(string)
+	//userID := ctx.Value("userID").(string)
+	val := ctx.Value("userID")
+	if val == nil {
+		log.Log.Logger.Error("post is not belong to the user")
+		return errno.ErrPostNotBelongToUser
+	}
+	userID := val.(string)
 	if post.UserID != userID {
 		log.Log.Logger.Error("post is not belong to the user")
 		return errno.ErrPostNotBelongToUser

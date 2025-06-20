@@ -23,5 +23,5 @@ func TestCompare(t *testing.T) {
 	assert.NotEmpty(t, encrypt)
 	err = Compare(encrypt, "123456")
 	assert.NoError(t, err)
-	
+
 }

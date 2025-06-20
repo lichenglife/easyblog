@@ -8,9 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/jaeger"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
@@ -97,8 +98,10 @@ func (m *Monitor) RegisterRoutes(r *gin.Engine) {
 func (m *Monitor) initMetrics() error {
 	// 注册默认的metrics
 	m.registry.MustRegister(
-		prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
-		prometheus.NewGoCollector(),
+
+		//prometheus.NewProcessCollector(prometheus.ProcessCollectorOpts{}),
+		//prometheus.NewGoCollector(),
+		collectors.NewGoCollector(),
 	)
 
 	// 创建自定义metrics
@@ -131,7 +134,11 @@ func (m *Monitor) initMetrics() error {
 // initTrace 初始化trace
 func (m *Monitor) initTrace() error {
 	// 创建Jaeger导出器
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
+	// 创建 OTLP HTTP 导出器
+	exp, err := otlptracehttp.New(context.Background(),
+		otlptracehttp.WithEndpoint("localhost:4318"), // 你的 OTLP Collector 地址
+		otlptracehttp.WithInsecure(),
+	)
 	if err != nil {
 		return err
 	}

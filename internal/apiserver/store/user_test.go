@@ -64,7 +64,7 @@ func TestNewUsers(t *testing.T) {
 		t.Errorf("create failed user %v", err)
 	}
 	// 确保所有SQL 执行
-	mock.ExpectationsWereMet()
+	assert.NoError(t, mock.ExpectationsWereMet())
 	// 验证期待
 	assert.NoError(t, err)
 	assert.NoError(t, mock.ExpectationsWereMet())

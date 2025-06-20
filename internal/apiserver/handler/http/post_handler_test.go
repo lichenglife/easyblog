@@ -25,6 +25,9 @@ import (
 type MockPostBiz struct {
 	mock.Mock
 }
+type ctxKey string
+
+const userIDKey ctxKey = "userID"
 
 func (m *MockPostBiz) CreatePost(ctx context.Context, req *model.CreatePostRequest) (*model.Post, error) {
 	args := m.Called(ctx, req)
@@ -187,7 +190,7 @@ func TestPostHandler_CreatePost_FullFlow(t *testing.T) {
 	req := httptest.NewRequest("POST", "/posts", bytes.NewReader(bodyBytes))
 	req.Header.Set("Content-Type", "application/json")
 	// Gin中间件通常会设置userID，这里直接用Set方法模拟
-	req = req.WithContext(context.WithValue(req.Context(), "userID", "u1"))
+	req = req.WithContext(context.WithValue(req.Context(), userIDKey, "u1"))
 
 	mockPostBiz.On("CreatePost", mock.Anything, mock.AnythingOfType("*model.CreatePostRequest")).Return(&model.Post{PostID: "p1", UserID: "u1"}, nil).Once()
 

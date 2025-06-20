@@ -10,10 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type mockViperConfig struct {
-	viper *viper.Viper
-}
-
 func setMockViperConfig() *viper.Viper {
 
 	viper := viper.New()
@@ -30,10 +26,6 @@ func setMockViperConfig() *viper.Viper {
 	viper.Set("redis.maxIdelConns", 10)
 
 	return viper
-}
-
-func (m *mockViperConfig) Set(key string, value interface{}) {
-	m.viper.Set(key, value)
 }
 
 func TestNewCache_Success(t *testing.T) {
