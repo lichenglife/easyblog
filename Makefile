@@ -41,7 +41,7 @@ cover: ## 执行单元测试覆盖率
 	go test -coverprofile=coverage.out ./...
 
 coverhtml:  ## 查看单元测试覆盖率
-   go tool cover -html coverage.out
+   # go tool cover -html coverage.out
 ## ----------------------------------------------------
 ## Cleanup
 ## ----------------------------------------------------
@@ -73,6 +73,32 @@ swagger: ## 生成swagger 文档
 help: Makefile ## 显示帮助信息
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<TARGETS> <OPTIONS>\033[0m\n\n\033[35mTargets:\033[0m\n"} /^[0-9A-Za-z._-]+:.*?##/ { printf "  \033[36m%-45s\033[0m %s\n", $$1, $$2 } /^\$\([0-9A-Za-z_-]+\):.*?##/ { gsub("_","-", $$1); printf "  \033[36m%-45s\033[0m %s\n", tolower(substr($$1, 3, length($$1)-7)), $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' Makefile #$(MAKEFILE_LIST)
 	@echo -e "$$USAGE_OPTIONS"
+
+# 生成 Proto 文件的Go代码
+protoc: ## 生成 Proto 文件的Go代码
+	@echo "生成 Proto 代码..."
+#	# @protoc --proto_path=. \
+#	# 	--proto_path=./third_party \
+#	# 	--proto_path=./third_party/protobuf \
+#	# 	--go_out=. --go_opt=paths=source_relative \
+	# 	--go-grpc_out=. --go-grpc_opt=paths=source_relative \
+	# 	pkg/api/apiserver/v1/*.proto
+   # protoc  --proto_path=. --proto_path=./third_party --proto_path=./third_party/protobuf --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pkg/api/apiserver/v1/*.proto
+
+
+# 生成 gRPC 的 Swagger 文档
+grpc-swagger: ## 生成 gRPC 的 Swagger 文档
+	@echo "生成 gRPC Swagger 文档..."
+	# @protoc --proto_path=. \
+	# 	--proto_path=./third_party \
+	# 	--proto_path=./third_party/protobuf \
+	# 	--openapiv2_out=./api/swagger \
+	# 	--openapiv2_opt=logtostderr=true \
+	# 	--openapiv2_opt=allow_merge=true \
+	# 	--openapiv2_opt=merge_file_name=miniblog \
+	# 	--openapiv2_opt=json_names_for_fields=false \
+	# 	pkg/api/apiserver/v1/*.proto 
+
 
 # 伪目标
 .PHONY: all build test cover clean lint tidy format swagger  help

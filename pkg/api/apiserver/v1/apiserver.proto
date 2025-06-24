@@ -1,0 +1,127 @@
+// Copyright  All rights reserved.
+// Use of this source code is governed by a MIT style
+// license that can be found in the LICENSE file. The original repo for
+// this file is https://github.com/lichenglife/miniblog. The professional
+// version of this repository is https://github.com/lichenglife/onex.
+
+// MiniBlog API 定义，包含健康检查、用户管理和文章管理的 RPC 接口
+syntax = "proto3"; // 告诉编译器此文件使用什么版本的语法
+
+package v1;
+
+// 提供了一个标准的空消息类型 google.protobuf.Empty，适用于 RPC 方法不需要输入消息或输出消息的场景
+import "google/protobuf/empty.proto";
+// 定义当前服务所依赖的健康检查消息
+import "pkg/api/apiserver/v1/healthz.proto";
+// 定义当前服务所依赖的博客消息
+import "pkg/api/apiserver/v1/post.proto";
+// 定义当前服务所依赖的用户消息
+import "pkg/api/apiserver/v1/user.proto";
+// 导入HTTP注释选项
+import "google/api/annotations.proto";
+
+// 指定协议缓冲区文件生成的 Go 代码所在的包路径
+option go_package = "github.com/lichenglife/easyblog/pkg/api/apiserver/v1;v1";
+// EasyBlog 定义个一个 EasyBlog RPC 服务
+service Easyblog {
+    // Healthz 健康检查
+    rpc Healthz(google.protobuf.Empty) returns (HealthzResponse){
+        option (google.api.http) = {
+            get: "/api/v1/healthz"
+        };
+    }
+    // Login 用户登录
+    rpc Login (LoginRequest) returns (LoginResponse) {
+      option (google.api.http) = {
+        post: "/api/v1/login"
+        body: "*"
+      };
+    }
+    // RefreshToken 刷新令牌
+    rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/refresh-token"
+            body: "*"
+        };
+    }
+
+    // ChangePassword 修改密码
+    rpc  ChangePassword(ChangePasswordRequest) returns (ChangePasswordResponse){
+        option (google.api.http) = {
+           post: "/api/v1/users/{userID}/password"
+           body: "*"
+        };
+    }
+    // CreateUser 创建用户
+    rpc CreateUser (CreateUserRequest) returns (CreateUserResponse){
+        option (google.api.http) = {
+            post: "/api/v1/users"
+            body: "*"
+        };
+    }
+
+    // UpdateUser 更新用户
+    rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse){
+        option (google.api.http) = {
+            post: "/api/v1/users/{userID}"
+            body: "*"
+        };
+    }
+
+    // DeleteUser 删除用户
+    rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse){
+        option (google.api.http) = {
+            delete: "/api/v1/users/{userID}"
+        };
+    }
+    // GetUser 获取用户信息
+    rpc GetUser (GetUserRequest) returns (GetUserResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/users/{userID}"
+        };
+    }
+    
+    // ListUser 列出所有用户
+    rpc ListUser(ListUserRequest) returns (ListUserResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/users"
+        };
+    }
+
+    // CreatePost 创建文章
+    rpc CreatePost(CreatePostRequest) returns (CreatePostResponse) {
+        option (google.api.http) = {
+            post: "/api/v1/posts"
+            body: "*"
+        };
+    }
+
+    // UpdatePost 更新文章
+    rpc UpdatePost(UpdatePostRequest) returns (UpdatePostResponse) {
+        option (google.api.http) = {
+            put: "/api/v1/posts/{postID}"
+            body: "*"
+        };
+    }
+
+    // DeletePost 删除文章
+    rpc DeletePost(DeletePostRequest) returns (DeletePostResponse) {
+        option (google.api.http) = {
+            delete: "/api/v1/posts/{postID}"
+        };
+    }
+
+    // GetPost 获取文章信息
+    rpc GetPost(GetPostRequest) returns (GetPostResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/posts/{postID}"
+        };
+    }
+
+    // ListPost 列出所有文章
+    rpc ListPost(ListPostRequest) returns (ListPostResponse) {
+        option (google.api.http) = {
+            get: "/api/v1/posts"
+        };
+    }
+}

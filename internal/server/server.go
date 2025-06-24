@@ -33,8 +33,10 @@ type UnionServer struct {
 	// 监控
 	monitor *monitor.Monitor
 	//  grpcserver
+	grpcServer *GRPCServer
 }
 
+// 实例化UnionServer 实例化httpserver以及grpcServer
 func NewUnionServer(cfg *viper.Viper, app app.IApp) (*UnionServer, error) {
 	server := &UnionServer{
 		cfg: cfg,
@@ -62,6 +64,11 @@ func NewUnionServer(cfg *viper.Viper, app app.IApp) (*UnionServer, error) {
 	server.httpServer = httpServer
 
 	// 初始化grpcServer
+	grpcServer, err := NewGrpcServer(cfg, app)
+	if err != nil {
+		return nil, fmt.Errorf("初始化grpcServer失败%v", err)
+	}
+	server.grpcServer = grpcServer
 
 	return server, nil
 }
@@ -78,6 +85,11 @@ func (s *UnionServer) Init() error {
 	// 添加监控中间件
 	s.httpServer.engine.Use(s.monitor.Middleware())
 
+	// 初始化grpcserver
+	if err := s.grpcServer.Init(); err != nil {
+		return fmt.Errorf("初始化grpcServer失败%v", err)
+	}
+
 	return nil
 }
 
@@ -88,6 +100,10 @@ func (s *UnionServer) Start() error {
 		return fmt.Errorf("启动HTTPServer失败%v", err)
 	}
 	// 启动GRPCServer 服务
+	if err := s.grpcServer.Start(); err != nil {
+		return fmt.Errorf("启动GRPCServer失败%v", err)
+	}
+
 	return nil
 }
 
@@ -95,9 +111,10 @@ func (s *UnionServer) Stop(ctx context.Context) error {
 
 	s.app.GetLogger().Logger.Info("正在停止服务")
 	if err := s.httpServer.Stop(ctx); err != nil {
-
 		return fmt.Errorf("停止HTTPServer失败%v", err)
-
+	}
+	if err := s.grpcServer.Stop(ctx); err != nil {
+		return fmt.Errorf("停止GRPCServer失败%v", err)
 	}
 
 	return nil
