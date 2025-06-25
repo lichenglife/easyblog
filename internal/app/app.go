@@ -8,7 +8,7 @@ import (
 	"github.com/lichenglife/easyblog/internal/pkg/cache"
 	"github.com/lichenglife/easyblog/internal/pkg/db"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
-	"github.com/lichenglife/easyblog/internal/pkg/middleware"
+	middleware "github.com/lichenglife/easyblog/internal/pkg/middleware/http"
 
 	"github.com/spf13/viper"
 )

@@ -5,8 +5,11 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors"
+	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/selector"
 	handler "github.com/lichenglife/easyblog/internal/apiserver/handler/grpc"
 	"github.com/lichenglife/easyblog/internal/app"
+	middleware "github.com/lichenglife/easyblog/internal/pkg/middleware/grpc"
 	pb "github.com/lichenglife/easyblog/pkg/api/apiserver/v1"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
@@ -63,9 +66,18 @@ func (s *GRPCServer) Init() error {
 		// 生产环境使用安全证书
 		//grpc.Creds(credentials.NewTLS(&tls.Config{})),
 
-		// 添加拦截器(一元拦截器、流拦截器)
-		//grpc.UnaryInterceptor(),
-		//grpc.StreamInterceptor(),
+		grpc.ChainUnaryInterceptor(
+			// 请求ID 拦截器
+			middleware.RequestIDInterceptor(),
+			// 认证拦截器
+			selector.UnaryServerInterceptor(middleware.AuthnInterceptor(), NewAuthnWhiteListMatcher()),
+			// 鉴权拦截器
+
+			// 请求默认值拦截器
+
+			// 数据校验拦截器
+
+		),
 	}
 	// 3、创建grpc server
 	s.server = grpc.NewServer(opts...)
@@ -87,6 +99,19 @@ func (s *GRPCServer) Init() error {
 	reflection.Register(s.server)
 	// 创建 gRPC Server → 实例化业务服务 → 注册服务 → 注册反射 → 启动监听。
 	return nil
+}
+
+// NewAuthnWhiteListMatcher 创建认证白名单匹配器.
+func NewAuthnWhiteListMatcher() selector.Matcher {
+	whitelist := map[string]struct{}{
+		pb.Easyblog_Healthz_FullMethodName:    {},
+		pb.Easyblog_CreateUser_FullMethodName: {},
+		pb.Easyblog_Login_FullMethodName:      {},
+	}
+	return selector.MatchFunc(func(ctx context.Context, call interceptors.CallMeta) bool {
+		_, ok := whitelist[call.FullMethod()]
+		return !ok
+	})
 }
 
 // 启动服务

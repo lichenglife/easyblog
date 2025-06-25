@@ -7,11 +7,11 @@ server:
     maxHeaderBytes: 1048576
   grpc:
     port: 9090
-    maxConnectionAge: 3600
-    maxConnectionAgeGrace: 10
-    maxConnectionIdle: 300
-    keepAliveTime: 60
-    keepAliveTimeout: 20
+    maxConnectionAge: 3600s
+    maxConnectionAgeGrace: 10s
+    maxConnectionIdle: 300s
+    keepAliveTime: 60s
+    keepAliveTimeout: 20s
     maxRecvMsgSize: 4194304 # 4MB
     maxSendMsgSize: 4194304 # 4MB
 

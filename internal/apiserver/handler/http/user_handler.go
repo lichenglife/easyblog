@@ -8,7 +8,7 @@ import (
 	"github.com/lichenglife/easyblog/internal/pkg/core"
 	"github.com/lichenglife/easyblog/internal/pkg/errno"
 	"github.com/lichenglife/easyblog/internal/pkg/log"
-	"github.com/lichenglife/easyblog/internal/pkg/middleware"
+	middleware "github.com/lichenglife/easyblog/internal/pkg/middleware/http"
 	"github.com/lichenglife/easyblog/internal/pkg/validation"
 	"go.uber.org/zap"
 )

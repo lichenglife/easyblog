@@ -77,14 +77,7 @@ help: Makefile ## 显示帮助信息
 # 生成 Proto 文件的Go代码
 protoc: ## 生成 Proto 文件的Go代码
 	@echo "生成 Proto 代码..."
-#	# @protoc --proto_path=. \
-#	# 	--proto_path=./third_party \
-#	# 	--proto_path=./third_party/protobuf \
-#	# 	--go_out=. --go_opt=paths=source_relative \
-	# 	--go-grpc_out=. --go-grpc_opt=paths=source_relative \
-	# 	pkg/api/apiserver/v1/*.proto
-   # protoc  --proto_path=. --proto_path=./third_party --proto_path=./third_party/protobuf --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pkg/api/apiserver/v1/*.proto
-
+	protoc  --proto_path=. --proto_path=./third_party --proto_path=./third_party/protobuf --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative pkg/api/apiserver/v1/*.proto
 
 # 生成 gRPC 的 Swagger 文档
 grpc-swagger: ## 生成 gRPC 的 Swagger 文档

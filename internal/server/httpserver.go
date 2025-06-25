@@ -11,7 +11,7 @@ import (
 	handler "github.com/lichenglife/easyblog/internal/apiserver/handler/http"
 	"github.com/lichenglife/easyblog/internal/app"
 	"github.com/lichenglife/easyblog/internal/pkg/core"
-	"github.com/lichenglife/easyblog/internal/pkg/middleware"
+	middleware "github.com/lichenglife/easyblog/internal/pkg/middleware/http"
 	"github.com/spf13/viper"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
