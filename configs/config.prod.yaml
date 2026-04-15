@@ -1,0 +1,109 @@
+# EasyBlog 生产环境配置文件
+# 版本：v1.0
+# 创建时间：2026-04-03
+
+# 服务器配置
+server:
+  http:
+    mode: release                     # 生产模式：release
+    host: 0.0.0.0                     # 监听地址
+    port: 8080                        # 监听端口
+    readTimeout: 60                   # 读超时 (秒)
+    writeTimeout: 60                  # 写超时 (秒)
+    maxHeaderBytes: 1048576           # 最大请求头 (1MB)
+  grpc:
+    port: 9090
+    maxConnectionAge: 3600
+    maxConnectionAgeGrace: 10
+    maxConnectionIdle: 300
+    keepAliveTime: 60
+    keepAliveTimeout: 20
+    maxRecvMsgSize: 4194304
+    maxSendMsgSize: 4194304
+
+# JWT 配置
+jwt:
+  secret: ${JWT_SECRET:-change-me-in-production}  # 生产环境请使用环境变量
+  expire: 7200                        # Token 过期时间 (秒)
+  issuer: easyblog
+
+# 日志配置
+log:
+  level: info                         # 生产环境建议使用 info
+  dir: logs                           # 日志目录
+  format: json                        # JSON 格式，便于日志收集
+  outputPaths:
+    - stdout
+    - logs/apiserver.log
+  errorOutputPaths:
+    - stderr
+    - logs/error.log
+  maxSize: 100                        # 单个日志文件最大大小 (MB)
+  maxBackups: 7                       # 保留的日志文件数量
+  maxAge: 30                          # 日志保留天数
+  compress: true                      # 是否压缩旧日志
+
+# 数据库配置
+db:
+  host: ${DB_HOST:-127.0.0.1}
+  port: ${DB_PORT:-3306}
+  username: ${DB_USERNAME:-root}
+  password: ${DB_PASSWORD:-}
+  database: ${DB_DATABASE:-easyblog}
+  logLevel: error                     # 生产环境建议关闭 SQL 日志
+  maxIdleConns: 10
+  maxOpenConns: 100
+  connMaxLifetime: 3600
+
+# Redis 配置
+redis:
+  host: ${REDIS_HOST:-localhost}
+  port: ${REDIS_PORT:-6379}
+  password: ${REDIS_PASSWORD:-}
+  db: 0
+  poolSize: 100
+  minIdleConns: 10
+  maxIdleConns: 20
+
+# CORS 配置
+cors:
+  allowedOrigins:
+    - ${FRONTEND_URL:-http://localhost:5173}
+  allowedMethods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowedHeaders:
+    - Origin
+    - Content-Type
+    - Accept
+    - Authorization
+  allowCredentials: true
+  maxAge: 86400
+
+# 限流配置
+rateLimit:
+  enabled: true
+  rate: 100                           # 每秒请求数
+  burst: 200                          # 突发请求数
+
+# OSS 对象存储配置 (可选)
+oss:
+  enabled: ${OSS_ENABLED:-false}
+  endpoint: ${OSS_ENDPOINT:-}
+  bucket: ${OSS_BUCKET:-}
+  accessKeyId: ${OSS_ACCESS_KEY_ID:-}
+  accessKeySecret: ${OSS_ACCESS_KEY_SECRET:-}
+  basePath: /data/images
+
+# 图片上传配置
+upload:
+  basePath: ./data/uploads            # 本地上传目录
+  maxSize: 5242880                    # 最大上传大小 (5MB)
+  allowedTypes:
+    - image/jpeg
+    - image/png
+    - image/gif
+    - image/webp

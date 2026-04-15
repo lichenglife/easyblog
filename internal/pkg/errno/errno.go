@@ -81,6 +81,8 @@ var (
 	ErrUnauthorized = New(10004, "未授权", http.StatusUnauthorized)
 	// ErrForbidden 表示禁止访问
 	ErrForbidden = New(10005, "禁止访问", http.StatusForbidden)
+	// ErrPermissionDenied 表示权限不足
+	ErrPermissionDenied = New(10010, "权限不足", http.StatusForbidden)
 	// ErrNotFound 表示资源不存在
 	ErrNotFound = New(10006, "资源不存在", http.StatusNotFound)
 	// ErrTooManyRequests 表示请求过于频繁
@@ -110,6 +112,27 @@ var (
 	ErrPostAccessDenied   = New(30002, "无权访问该博客", http.StatusForbidden)
 	ErrInvalidPostTitle   = New(30003, "博客标题格式不正确", http.StatusBadRequest)
 	ErrInvalidPostContent = New(30004, "博客内容格式不正确", http.StatusBadRequest)
+
+	// 评论相关错误码 (31xxx)
+	ErrCommentNotFound    = New(31001, "评论不存在", http.StatusNotFound)
+	ErrCommentAccessDenied = New(31002, "无权操作该评论", http.StatusForbidden)
+
+	// 点赞相关错误码 (32xxx)
+	ErrAlreadyLiked       = New(32001, "已点赞", http.StatusConflict)
+	ErrNotLiked           = New(32002, "未点赞", http.StatusConflict)
+
+	// 图片相关错误码 (33xxx)
+	ErrFileTooLarge      = New(33001, "文件超出最大限制", http.StatusBadRequest)
+	ErrInvalidFileType   = New(33002, "不支持的文件类型", http.StatusBadRequest)
+	ErrImageNotFound     = New(33003, "图片不存在", http.StatusNotFound)
+
+	// 分类相关错误码 (34xxx)
+	ErrCategoryNotFound     = New(34001, "分类不存在", http.StatusNotFound)
+	ErrCategoryAlreadyExist = New(34002, "分类已存在", http.StatusConflict)
+
+	// 标签相关错误码 (35xxx)
+	ErrTagNotFound     = New(35001, "标签不存在", http.StatusNotFound)
+	ErrTagAlreadyExist = New(35002, "标签已存在", http.StatusConflict)
 )
 
 // IsRecordNotFound 判断是否是记录不存在错误

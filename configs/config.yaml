@@ -1,0 +1,85 @@
+server:
+  http:
+    mode: debug
+    port: 8080
+    readTimeout: 60
+    writeTimeout: 60
+    maxHeaderBytes: 1048576
+  grpc:
+    port: 9090
+    maxConnectionAge: 3600
+    maxConnectionAgeGrace: 10
+    maxConnectionIdle: 300
+    keepAliveTime: 60
+    keepAliveTimeout: 20
+    maxRecvMsgSize: 4194304
+    maxSendMsgSize: 4194304
+
+jwt:
+  secret: uatuatnonffffffff
+  expire: 7200
+  issuer: easyblog
+
+log:
+  level: info
+  dir: logs
+  format: json
+  outputPaths:
+    - stdout
+  errorOutputPaths:
+    - stderr
+  maxSize: 100
+  maxBackups: 7
+  maxAge: 30
+  compress: true
+
+db:
+  host: 127.0.0.1
+  port: 13306
+  username: root
+  password: root123
+  database: easyblog
+  logLevel: info
+  maxIdleConns: 10
+  maxOpenConns: 100
+  connMaxLifetime: 3600
+
+redis:
+  host: localhost
+  port: 16379
+  password: ""
+  db: 0
+  poolSize: 100
+  minIdleConns: 10
+  maxIdleConns: 20
+
+cors:
+  allowedOrigins:
+    - "http://localhost:5173"
+    - "http://localhost:3000"
+  allowedMethods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allowedHeaders:
+    - Origin
+    - Content-Type
+    - Accept
+    - Authorization
+  allowCredentials: true
+  maxAge: 86400
+
+rateLimit:
+  enabled: true
+  rate: 100
+  burst: 200
+
+oss:
+  enabled: false
+  endpoint: ""
+  bucket: ""
+  accessKeyId: ""
+  accessKeySecret: ""
+  basePath: /data/images

@@ -16,11 +16,13 @@ var (
 
 // IStore 存储层工厂接口
 type IStore interface {
-	// Post() PostStore
 	User() UserStore
-
 	Post() PostStore
-
+	Comment() CommentStore
+	Like() LikeStore
+	Category() CategoryStore
+	Tag() TagStore
+	PostTag() PostTagStore
 	Close() error
 }
 
@@ -52,6 +54,31 @@ func (ds *dataStore) Post() PostStore {
 	return NewPosts(ds.db)
 }
 
+// Comment() CommentStore
+func (ds *dataStore) Comment() CommentStore {
+	return NewComments(ds.db)
+}
+
+// Like() LikeStore
+func (ds *dataStore) Like() LikeStore {
+	return NewLikes(ds.db)
+}
+
+// Category() CategoryStore
+func (ds *dataStore) Category() CategoryStore {
+	return NewCategories(ds.db)
+}
+
+// Tag() TagStore
+func (ds *dataStore) Tag() TagStore {
+	return NewTags(ds.db)
+}
+
+// PostTag() PostTagStore
+func (ds *dataStore) PostTag() PostTagStore {
+	return NewPostTagStore(ds.db)
+}
+
 func (ds *dataStore) Close() error {
 	sqlDB, err := ds.db.DB()
 	if err != nil {
@@ -59,4 +86,9 @@ func (ds *dataStore) Close() error {
 	}
 
 	return sqlDB.Close()
+}
+
+// NewTestStore 创建存储层工厂实例（用于测试，不使用 once）
+func NewTestStore(db *gorm.DB) IStore {
+	return &dataStore{db: db}
 }

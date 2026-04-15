@@ -6,10 +6,63 @@
 go.work
 go.work.sum
 
+# Go 编译输出
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*_test
+*.prof
+coverage.out
+
 # 日志文件
 *.log
 
 # 自定义文件
 /_output
 
+bin/*
+
+# VSCode
 /.vscode
+
+# IDEA
+/.idea
+*.iml
+
+# 环境变量
+.env
+.env.local
+.env.*.local
+
+# 前端依赖
+frontend/node_modules
+frontend/dist
+frontend/.vite
+
+# 后端依赖
+vendor/
+
+# 测试
+test-results/
+
+# OSS 临时文件
+/data/oss-cache/
+
+# Docker
+docker-compose.override.yml
+
+# clade配置
+./claude
+
+
+#binlog
+*binlog.*
+
+data/mysql/*
+data/redis*
+#minio
+minio/
+
+#redis

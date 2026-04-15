@@ -2,6 +2,9 @@ package db
 
 import (
 	"fmt"
+	"io"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/spf13/viper"
@@ -83,6 +86,60 @@ func (db *DB) Close() error {
 
 	if err := sqlDB.Close(); err != nil {
 		return fmt.Errorf("关闭数据库连接失败: %v", err)
+	}
+
+	return nil
+}
+
+// RunMigrations 执行数据库迁移脚本
+func (db *DB) RunMigrations(sqlFile string) error {
+	// 读取 SQL 文件
+	content, err := os.ReadFile(sqlFile)
+	if err != nil {
+		return fmt.Errorf("读取迁移文件失败：%v", err)
+	}
+
+	// 执行 SQL 脚本
+	if err := db.Exec(string(content)).Error; err != nil {
+		return fmt.Errorf("执行迁移脚本失败：%v", err)
+	}
+
+	return nil
+}
+
+// RunMigrationsFromDir 从目录执行所有 SQL 迁移文件
+func (db *DB) RunMigrationsFromDir(dir string) error {
+	// 读取目录下的所有 SQL 文件
+	files, err := filepath.Glob(filepath.Join(dir, "*.sql"))
+	if err != nil {
+		return fmt.Errorf("读取迁移目录失败：%v", err)
+	}
+
+	for _, file := range files {
+		// 读取 SQL 文件
+		content, err := os.ReadFile(file)
+		if err != nil {
+			return fmt.Errorf("读取迁移文件 %s 失败：%v", file, err)
+		}
+
+		// 执行 SQL 脚本
+		if err := db.DB.Exec(string(content)).Error; err != nil {
+			return fmt.Errorf("执行迁移脚本 %s 失败：%v", file, err)
+		}
+	}
+
+	return nil
+}
+
+// ReadFromReader 从 io.Reader 执行 SQL
+func (db *DB) ReadFromReader(r io.Reader) error {
+	content, err := io.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("读取 SQL 内容失败：%v", err)
+	}
+
+	if err := db.Exec(string(content)).Error; err != nil {
+		return fmt.Errorf("执行 SQL 失败：%v", err)
 	}
 
 	return nil
